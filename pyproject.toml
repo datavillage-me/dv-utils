@@ -1,0 +1,50 @@
+[build-system]
+requires = ["poetry>=0.12", "setuptools>=40.8.0"]
+build-backend = "poetry.masonry.api"
+
+[tool]
+[tool.poetry]
+name = "DataVillage-Utils"
+version = "0.0.1"
+description = "DataVillage Python utils for interaction with the middleware and building algo processing code"
+authors = ["Loic Quertenmont <loic@deeperanalytics.be>"]
+readme = "README.md"
+repository = "https://github.com/datavillage-me/dv-utils"
+
+[tool.poetry.dependencies]
+python = ">=3.10.4,<4"
+rdflib = "*"
+python-decouple = "*"
+requests = "*"
+redis = "*"
+types-requests = "*"
+types-redis = "*"
+
+[tool.poetry.dev-dependencies]
+mypy = "*"
+pylint = "*"
+coverage = "*"
+black = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-asyncio = "*"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = "tests"
+
+[tool.pylint.format]
+max-line-length=139
+
+[tool.pylint.master]
+extension-pkg-whitelist = ["pydantic"]
+
+disable=[
+   'logging-fstring-interpolation',
+#	'broad-except',
+#        'C0114', #missing-module-docstring
+#        'C0115', #missing-class-docstring
+#        'C0116', #missing-function-docstring
+]
+
+
