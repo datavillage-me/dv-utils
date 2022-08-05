@@ -31,17 +31,19 @@ class RedisQueue:
         """
         Create the consummer group if it does not exist
         """
-        groups_info = self.redis.xinfo_groups("events")
-        if not any(x for x in groups_info if x["name"] == self.consumer_group.encode()):
+        try:
             self.redis.xgroup_create("events", self.consumer_group, mkstream=True)
+        except redis.exceptions.ResponseError as error:
+            if str(error).startswith("BUSYGROUP"):
+                pass
+            else:
+                raise error
 
     def destroy_consummer_group(self) -> None:
         """
         Remove the consummer group if it exists
         """
-        groups_info = self.redis.xinfo_groups("events")
-        if any(x for x in groups_info if x["name"] == self.consumer_group.encode()):
-            self.redis.xgroup_destroy("events", self.consumer_group)
+        self.redis.xgroup_destroy("events", self.consumer_group)
 
     def publish(self, data: dict, create_consumer_group=False) -> str:
         """
