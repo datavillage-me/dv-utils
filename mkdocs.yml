@@ -1,0 +1,10 @@
+site_name: Datavillage utils (python SDK)
+
+theme:
+  name: "material"
+
+plugins:
+  - mkdocstrings
+
+nav:
+  - index.md
