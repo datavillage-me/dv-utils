@@ -92,7 +92,7 @@ class Client:
         response = requests.request(method, url, headers=headers, data=data)
         response.raise_for_status()
 
-        if response.headers["Content-Type"] and "application/json" in response.headers["Content-Type"]:
+        if response.headers["content-type"] and "application/json" in response.headers["content-type"]:
             return response.json()
         else:
             return response.text
