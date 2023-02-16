@@ -98,7 +98,7 @@ class RedisQueue:
             return message
         return None
 
-    def listen(self, processor, timeout=3600):
+    def listen(self, processor, timeout=60):
         """
         Listen to the redis queue until the timeout is reached, and process every incoming message in that interval
         with the provided processor function
@@ -106,6 +106,7 @@ class RedisQueue:
         :param timeout: timeout in seconds
         :return:
         """
-        evt = self.listen_once(timeout)
-        if evt:
-            processor(evt)
+        while True:
+           evt = self.listen_once(timeout)
+           if evt:
+               processor(evt)
