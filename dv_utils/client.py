@@ -60,7 +60,7 @@ class Client:
 
         self.request(
             f"/clients/{self.settings.client_id}/applications/{self.settings.app_id}/activeUsers/{user_id}/{filename}",
-            method="POST",
+            method="PUT",
             data=content,
         )
 
