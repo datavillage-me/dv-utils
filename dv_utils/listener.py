@@ -6,7 +6,7 @@ from typing import Any, Callable
 
 from .process import process_event_dummy
 from .redis import RedisQueue
-
+from .log_utils import audit_log
 
 class DefaultListener:
     """
@@ -19,6 +19,9 @@ class DefaultListener:
         # Instantiate the local Datavillage Redis queue
         redis_queue = RedisQueue()
         redis_queue.create_consummer_group()
+
+        audit_log(log="Algo Event Listener starting", app="algo"):
+
 
         if daemon:
             # listen continously and process all incoming events
