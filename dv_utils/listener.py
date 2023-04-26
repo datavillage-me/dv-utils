@@ -20,7 +20,7 @@ class DefaultListener:
         redis_queue = RedisQueue()
         redis_queue.create_consummer_group()
 
-        audit_log(log="Algo Event Listener starting", app="algo"):
+        audit_log(log="Algo Event Listener starting", app="algo")
 
 
         if daemon:
