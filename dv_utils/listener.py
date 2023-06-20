@@ -7,6 +7,7 @@ from typing import Any, Callable
 from .process import process_event_dummy
 from .redis import RedisQueue
 from .log_utils import audit_log
+import time
 
 class DefaultListener:
     """
@@ -14,21 +15,37 @@ class DefaultListener:
     """
 
     def __init__(
-        self, event_processor: Callable[[dict], Any] = process_event_dummy, daemon=False
+        self, event_processor: Callable[[dict], Any] = process_event_dummy, daemon=False, log_events=True,
     ):
         # Instantiate the local Datavillage Redis queue
         redis_queue = RedisQueue()
         redis_queue.create_consummer_group()
 
-        audit_log(log="Algo Event Listener starting", app="algo")
+        if(daemon):
+           audit_log(log="Algo Event Listener started", app="algo")
 
+        while True:
+           evt = self.listen_once(timeout)
+           if evt:
+               start = time.time()
+               evt_type =evt.get("type", "MISSING_TYPE")
+               if(log_events):
+                  audit_log("Event processing started", evt=evt_type, state="STARTED", app="algo")
 
-        if daemon:
-            # listen continously and process all incoming events
-            # the listen loop stops by default after 1h
-            redis_queue.listen(event_processor)
-        else:
-            # wait for one event and process it
-            event = redis_queue.listen_once()
-            if event:
-                event_processor(event)
+               try:
+                  processor(evt)
+               except Exception as err:
+                   if(log_events):
+                     audit_log("Event processing failed", evt=evt_type, state="FAILED", app="algo", error:str(err), processing_time:time.time()-start)
+              else:
+                  if(log_events):
+                     audit_log("Event processing done", evt=evt_type, state="DONE", app="algo", processing_time:time.time()-start)
+               
+          
+           if not daemon:
+               #stop after one event
+               break
+
+        if(daemon):
+           audit_log(log="Algo Event Listener Ended", app="algo")
+

@@ -97,16 +97,3 @@ class RedisQueue:
             logging.debug(f"Received message {msg_id}...")
             return message
         return None
-
-    def listen(self, processor, timeout=60):
-        """
-        Listen to the redis queue until the timeout is reached, and process every incoming message in that interval
-        with the provided processor function
-        :param processor: the function to process incoming messages
-        :param timeout: timeout in seconds
-        :return:
-        """
-        while True:
-           evt = self.listen_once(timeout)
-           if evt:
-               processor(evt)
