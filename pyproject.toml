@@ -5,7 +5,7 @@ build-backend = "poetry.masonry.api"
 [tool]
 [tool.poetry]
 name = "dv-utils"
-version = "0.0.13"
+version = "0.1.0"
 description = "DataVillage Python utils for interaction with the middleware and building algo processing code"
 authors = ["Loic Quertenmont <loic@deeperanalytics.be>"]
 readme = "README.md"

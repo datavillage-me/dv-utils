@@ -35,11 +35,11 @@ class DefaultListener:
                try:
                   processor(evt)
                except Exception as err:
-                   if(log_events):
-                     audit_log("Event processing failed", evt=evt_type, state="FAILED", app="algo", error:str(err), processing_time:time.time()-start)
-              else:
                   if(log_events):
-                     audit_log("Event processing done", evt=evt_type, state="DONE", app="algo", processing_time:time.time()-start)
+                     audit_log("Event processing failed", evt=evt_type, state="FAILED", app="algo", error=str(err), processing_time=time.time()-start)
+               else:
+                  if(log_events):
+                     audit_log("Event processing done", evt=evt_type, state="DONE", app="algo", processing_time=time.time()-start)
                
           
            if not daemon:
