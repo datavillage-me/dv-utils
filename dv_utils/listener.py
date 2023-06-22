@@ -25,7 +25,7 @@ class DefaultListener:
            audit_log(log="Algo Event Listener started", app="algo")
 
         while True:
-           evt = self.listen_once(timeout)
+           evt = redis_queue.listen_once(timeout)
            if evt:
                start = time.time()
                evt_type =evt.get("type", "MISSING_TYPE")
