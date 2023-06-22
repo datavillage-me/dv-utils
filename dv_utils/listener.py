@@ -33,7 +33,7 @@ class DefaultListener:
                   audit_log("Event processing started", evt=evt_type, state="STARTED", app="algo")
 
                try:
-                  processor(evt)
+                  event_processor(evt)
                except Exception as err:
                   if(log_events):
                      audit_log("Event processing failed", evt=evt_type, state="FAILED", app="algo", error=str(err), processing_time=time.time()-start)
