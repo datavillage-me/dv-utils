@@ -36,7 +36,7 @@ class Settings:
         self.app_id: str = config("DV_APP_ID", default="", cast=str)
         self.client_id: str = config("DV_CLIENT_ID", default="", cast=str)
 
-        self.log_level = config("LOGLEVEL", default="DEBUG", cast=str)
+        self.log_level = config("LOGLEVEL", default="INFO", cast=str)
         self.daemon = config("DAEMON", default=False, cast=bool)
 
         self.redis_host = config("REDIS_SERVICE_HOST", default="localhost", cast=str)
