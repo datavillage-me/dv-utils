@@ -6,6 +6,7 @@ import json
 import logging
 
 import redis
+import os
 
 from .settings import settings as default_settings
 
@@ -25,7 +26,7 @@ class RedisQueue:
     ):
         self.consumer_group = "consummers"
         self.consumer_name = consumer_name
-        self.redis = redis.Redis(host, port, db=0, ssl=True)
+        self.redis = redis.Redis(host, port, db=0, ssl=True, ssl_ca_certs=os.environ.get("TLS_CAFILE",None))
 
     def create_consummer_group(self) -> None:
         """
