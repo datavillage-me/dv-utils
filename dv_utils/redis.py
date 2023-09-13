@@ -25,7 +25,7 @@ class RedisQueue:
     ):
         self.consumer_group = "consummers"
         self.consumer_name = consumer_name
-        self.redis = redis.Redis(host, port, db=0)
+        self.redis = redis.Redis(host, port, db=0, ssl=True)
 
     def create_consummer_group(self) -> None:
         """
