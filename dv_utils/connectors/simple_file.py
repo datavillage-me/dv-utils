@@ -2,6 +2,7 @@ from .connector import Connector, Config
 from urllib.parse import urlparse
 import requests
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ class SimpleFileConfiguration(Config):
 
 
 class SimpleFileConnector(Connector):
-    config: SimpleFileConfiguration = None
+    config: SimpleFileConfiguration
 
     def __init__(self, config: SimpleFileConfiguration) -> None:
         super().__init__(config)
@@ -28,5 +29,5 @@ class SimpleFileConnector(Connector):
 
     def get(self):
         response = requests.get(self.config.url)
-        with open(self.config.download_dir + self.config.fileName, 'w') as file:
+        with open(os.path.join(self.config.download_dir, self.config.fileName), 'w') as file:
             file.write(response.text)
