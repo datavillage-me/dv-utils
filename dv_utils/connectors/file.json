@@ -1,0 +1,15 @@
+{
+	"schema": {
+		"url": {
+			"description": "The url hosting the file to be downloaded.",
+			"required": true
+		},
+		"file_name": {
+			"description": "The filename to which the resource should be downloaded."
+		},
+		"download_directory": {
+			"description": "The directory in which the resource should be downloaded.",
+			"default": "/resources/data"
+		}
+	}
+}
