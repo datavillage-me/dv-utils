@@ -1,40 +1,39 @@
-import copy
 import json
-from typing import TypeVar
+import logging
+import importlib.resources as importlib_resources
+
+logger = logging.getLogger(__name__)
 
 
-class Config():
-    download_dir = None
+class Configuration():
+    schema_file: str = None
 
 
-class Connector():
-
-    config = None
-
-    def __init__(self, config):
-        self.config = copy.copy(config)
-
-        if not self.config.download_dir:
-            self.config.download_dir = '/resources/data'
-
-    def get(self):
-        pass
-
-
-T = TypeVar('T')
-
-
-def populate_configuration(connector_id, config: T, config_dir='/resources/data') -> T:
+def populate_configuration(connector_id, config: Configuration, config_dir='/resources/data') -> Configuration:
     filename = f'{config_dir}/configuration_{connector_id}.json'
+
+    schema = None
+    with importlib_resources.open_text('connectors', config.schema_file) as config_file:
+        schema = json.load(config_file)['schema']
+
     with open(filename, 'r') as file:
         data = json.load(file)
         keys = data['connectorKeys']
 
-        parameters = [str.upper(a)
-                      for a in dir(config) if not a.startswith('__')]
+        for p in schema:
+            schema_field = schema[p]
+            value = keys[p]
 
-        for p in parameters:
-            if (p in keys):
-                setattr(config, str.lower(p), keys[p])
+            is_required = bool(schema_field.get('required'))
+            default = schema_field.get('default', "")
+
+            if not value and default:
+                value = default
+
+            if not value and is_required:
+                logger.error(f"Missing configured field <{p}>")
+                return None
+
+            setattr(config, p, keys[p])
 
         return config
