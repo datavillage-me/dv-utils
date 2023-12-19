@@ -13,7 +13,7 @@ def populate_configuration(connector_id, config: Configuration, config_dir='/res
     filename = f'{config_dir}/configuration_{connector_id}.json'
 
     schema = None
-    with importlib_resources.open_text('connectors', config.schema_file) as config_file:
+    with importlib_resources.open_text('dv_utils.connectors', config.schema_file) as config_file:
         schema = json.load(config_file)['schema']
 
     with open(filename, 'r') as file:

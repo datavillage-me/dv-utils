@@ -1,4 +1,4 @@
-from connectors.connector import Configuration
+from dv_utils.connectors.connector import Configuration
 from urllib.parse import urlparse
 import requests
 import logging
@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 class FileConfiguration(Configuration):
     schema_file = "file.json"
     url = None
-    fileName = None
-    downloadDir = None
+    file_name = None
+    download_directory = None
 
 
 class FileConnector():
@@ -21,10 +21,10 @@ class FileConnector():
     def __init__(self, config: FileConfiguration) -> None:
         self.config = copy.copy(config)
 
-        if not self.config.fileName:
-            self.config.fileName = urlparse(self.config.url).netloc
+        if not self.config.file_name:
+            self.config.file_name = urlparse(self.config.url).netloc
 
     def get(self):
         response = requests.get(self.config.url)
-        with open(os.path.join(self.config.download_dir, self.config.fileName), 'w') as file:
+        with open(os.path.join(self.config.download_directory, self.config.file_name), 'w') as file:
             file.write(response.text)
