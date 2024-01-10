@@ -40,8 +40,15 @@ class DriveConnector():
         if not is_valid_configuration(self.config):
             logger.error('Configuration is not valid')
 
-        credentials = ServiceAccountCredentials.from_json_keyfile_name(
-            'service.json', scope)
+        json_config = {'private_key': self.config.private_key,
+                       'client_email': self.config.client_email,
+                       'private_key_id': self.config.private_key_id,
+                       'client_id': self.config.client_id,
+                       'type': 'service_account'}
+
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+            json_config, scope)
+
         self.service = build('drive', 'v3', credentials=credentials)
 
     def get(self):
