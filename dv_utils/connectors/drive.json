@@ -1,0 +1,33 @@
+{
+	"schema": {
+		"project_id": {
+			"required": true
+		},
+		"private_key_id": {
+			"required": true
+		},
+		"private_key": {
+			"required": true
+		},
+		"client_email": {
+			"required": true
+		},
+		"client_id": {
+			"required": true
+		},
+		"client_x509_cert_url": {
+			"required": true
+		},
+		"resource_name": {
+			"required": true,
+			"description": "The name of the resource on the Google Drive."
+		},
+		"file_name": {
+			"description": "The filename to which the resource should be downloaded."
+		},
+		"download_directory": {
+			"description": "The directory in which the resource should be downloaded.",
+			"default": "/resources/data"
+		}
+	}
+}
