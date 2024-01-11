@@ -10,7 +10,7 @@ from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
 
 logger = logging.getLogger(__name__)
 
-scope = ['https://www.googleapis.com/auth/drive.file']
+scope = ['https://www.googleapis.com/auth/drive']
 
 
 class DriveConfiguration(Configuration):
