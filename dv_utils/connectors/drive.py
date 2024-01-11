@@ -5,23 +5,24 @@ import os
 import copy
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseDownload
+from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
 
 
 logger = logging.getLogger(__name__)
 
-scope = ['https://www.googleapis.com/auth/drive.readonly']
+scope = ['https://www.googleapis.com/auth/drive.file']
 
 
 class DriveConfiguration(Configuration):
     schema_file = "drive.json"
-    project_id = None
+
     private_key_id = None
     private_key = None
     client_email = None
     client_id = None
-    client_x509_cert_url = None
+
     resource_name = None
+    resource_directory_id = None
     file_name = None
     download_directory = None
 
@@ -80,3 +81,16 @@ class DriveConnector():
                             self.config.file_name)
         with open(path, 'wb') as f:
             f.write(file.getbuffer())
+
+    def push(self, file_path):
+
+        if not self.config.resource_directory_id:
+            logger.error("No resource directory configured")
+            return
+
+        file_metadata = {"name": self.config.resource_name,
+                         "parents": [self.config.resource_directory_id]}
+        media = MediaFileUpload(file_path)
+        
+        self.service.files().create(body=file_metadata,
+                                    media_body=media, fields="id").execute()

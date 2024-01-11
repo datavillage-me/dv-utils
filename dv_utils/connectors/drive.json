@@ -15,8 +15,9 @@
 		"client_id": {
 			"required": true
 		},
-		"client_x509_cert_url": {
-			"required": true
+		"resource_directory_id": {
+			"required": false,
+			"description": "The id of the resource folder on the Google Drive. This will be used to output the resulting data with the `push` command."
 		},
 		"resource_name": {
 			"required": true,
