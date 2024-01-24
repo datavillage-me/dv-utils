@@ -22,6 +22,7 @@ class DriveConfiguration(Configuration):
     client_id = None
 
     resource_name = None
+    resource_id = None
     resource_directory_id = None
     file_name = None
     download_directory = None
@@ -54,21 +55,28 @@ class DriveConnector():
 
     def get(self):
 
-        results = self.service.files().list().execute()
-        items = results.get('files', [])
-
         found = None
-        if not items:
-            logger.error("No files available on Google Drive")
-            return
-        else:
-            for item in items:
-                if (item['name'] == self.config.resource_name):
-                    found = item
 
-        if not found:
-            logger.error(f"File <{self.config.resource_name}> not found")
-            return
+        if not self.config.resource_id:
+            results = self.service.files().list().execute()
+            items = results.get('files', [])
+            if not items:
+                logger.error("No files available on Google Drive")
+                return
+            else:
+                def is_item(item):
+                    if self.config.resource_id:
+                        return item['id'] == self.config.resource_id
+                    return item['name'] == self.config.resource_name
+                for item in items:
+                    if is_item(item):
+                        found = item
+
+            if not found:
+                logger.error(f"File <{self.config.resource_name}> not found")
+                return
+        else:
+            found = {'id': self.config.resource_id}
 
         request_file = self.service.files().get_media(fileId=found['id'])
         file = io.BytesIO()
@@ -91,6 +99,6 @@ class DriveConnector():
         file_metadata = {"name": self.config.resource_name,
                          "parents": [self.config.resource_directory_id]}
         media = MediaFileUpload(file_path)
-        
+
         self.service.files().create(body=file_metadata,
                                     media_body=media, fields="id").execute()

@@ -20,8 +20,10 @@
 			"description": "The id of the resource folder on the Google Drive. This will be used to output the resulting data with the `push` command."
 		},
 		"resource_name": {
-			"required": true,
 			"description": "The name of the resource on the Google Drive."
+		},
+		"resource_id": {
+			"description": "The id of the resource on the Google Drive. When both the name and the id are defined the id will take precedence."
 		},
 		"file_name": {
 			"description": "The filename to which the resource should be downloaded."
