@@ -1,0 +1,24 @@
+{
+  "schema": {
+    "url": {
+      "description": "The url hosting the RSS feed to be downloaded.",
+      "required": true
+    },
+    "headers": {
+      "description": "Headers to be added to the request",
+      "required": false
+    },
+    "download": {
+      "description": "Boolean value indicating if the RSS data should be downloaded to a file. Default false",
+      "default": false
+    },
+    "file_name": {
+      "description": "The filename to which the resource should be downloaded.",
+      "default": "feed.rss"
+    },
+    "download_directory": {
+      "description": "The directory in which the resource should be downloaded.",
+      "default": "/resources/data"
+    }
+  }
+}
