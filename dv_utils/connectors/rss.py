@@ -10,8 +10,6 @@ logger = logging.getLogger(__name__)
 class RssConfiguration(Configuration):
     schema_file = "rss.json"
     url = None
-    headers = {}
-    download = False
     download_directory = None
     file_name = None
 
@@ -22,17 +20,15 @@ class RssConnector():
     self.config = copy.copy(config)
 
   def get(self):
-    resp = requests.get(self.config.url, headers=self.config.headers)
+    headers = {
+      "Cache-Control": "max-age=0",
+      "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"
+    }
+    resp = requests.get(self.config.url, headers=headers)
 
     if(resp.status_code > 399):
-      raise Exception(f"Fetching RSS feeds returned status [{resp.status_code}]: {resp}")
+      raise Exception(f"Fetching RSS feeds returned status [{resp.status_code}]")
 
-    if (self.config.download):
-      path = os.path.join(self.config.download_directory, self.config.file_name)
-      with open(path, 'w') as file:
-        file.write(resp.text)
-    else:
-      rss = feedparser.parse(resp.text)
-      if(rss.bozo):
-        raise rss.bozo_exception
-      return rss
+    path = os.path.join(self.config.download_directory, self.config.file_name)
+    with open(path, 'w') as file:
+      file.write(resp.text)
