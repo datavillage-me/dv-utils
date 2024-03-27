@@ -34,5 +34,5 @@ class RssConnector():
     else:
       rss = feedparser.parse(resp.text)
       if(rss.bozo):
-        logger.warn(f"Feed had bozo exception: {rss.bozo_exception}")
+        raise rss.bozo_exception
       return rss

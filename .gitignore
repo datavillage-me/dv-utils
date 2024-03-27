@@ -5,5 +5,3 @@
 dist/
 *.egg-info/
 
-test.py
-data
