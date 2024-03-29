@@ -13,6 +13,7 @@
     },
     "use_scraper": {
       "description": "Boolean to indicate if web scraping should be used to download from the url",
+      "type": "boolean",
       "default": "false"
     }
   }

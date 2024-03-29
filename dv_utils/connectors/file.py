@@ -14,7 +14,7 @@ class FileConfiguration(Configuration):
     url = None
     file_name = None
     download_directory = None
-    use_scraper = "false"
+    use_scraper = None
 
 
 class FileConnector():
@@ -27,7 +27,7 @@ class FileConnector():
             self.config.file_name = urlparse(self.config.url).netloc
 
     def get(self):
-        if(self.__should_use_scraper()):
+        if(self.config.use_scraper):
             scraper = cloudscraper.create_scraper()
             response = scraper.get(self.config.url)
         else:
@@ -38,17 +38,6 @@ class FileConnector():
         if(is_valid):
             with open(os.path.join(self.config.download_directory, self.config.file_name), 'w') as file:
                 file.write(response.text)
-
-    def __should_use_scraper(self) -> bool:
-        use_scraper_cleaned = self.config.use_scraper.strip().lower()
-        if(use_scraper_cleaned == "true"):
-            return True
-        
-        if(use_scraper_cleaned == "false"):
-            return False
-        
-        logger.warn(f"{self.config.use_scraper} is not a valid boolean value. Falling back to default `False`")
-        return False
     
     def __handle_response(self, response) -> bool :
         if(response.status_code > 399):
