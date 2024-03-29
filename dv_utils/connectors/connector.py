@@ -28,15 +28,37 @@ def populate_configuration(connector_id, config: Configuration, config_dir='/res
             value = keys.get(p)
 
             default = schema_field.get('default', "")
+            type = schema_field.get('type', "string")
 
             if not value and default:
                 value = default
+
+            value = __parse_value(value, type)
 
             if value:
                 setattr(config, p, value)
 
         return config
 
+def __parse_value(value: str, type: str):
+    type_cleaned = type.strip().lower()
+    if(type_cleaned in ['string', 'str']):
+        return value
+
+    if(type_cleaned in ['bool', 'boolean']):
+        return __parse_boolean_value(value)
+
+def __parse_boolean_value(value: str):
+    value_cleaned = value.strip().lower()
+    
+    if(value_cleaned in ['true', '1']):
+        return True
+    
+    elif(value_cleaned in ['false', '0']):
+        return False
+    
+    logger.warn(f"Value {value} not a valid boolean value. Using `false`")
+    return False
 
 def is_valid_configuration(config: Configuration):
     schema = None
