@@ -38,6 +38,7 @@ class FileConnector():
             self.__get_file(urls[i].strip(), file_names[i].strip())
     
     def __get_file(self, url, file_name):
+        logger.info(f'Downloading {file_name} from {url}')
         if(self.config.use_scraper):
             scraper = cloudscraper.create_scraper()
             response = scraper.get(url)
@@ -50,6 +51,7 @@ class FileConnector():
                 file.write(response.text)
         else:
             logger.error(f'Could not download file {file_name} from {url}. Got {response.status_code}')
+        logger.info('done')
     
     def __handle_response(self, response) -> bool :
         if(response.status_code > 399):
