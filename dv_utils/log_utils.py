@@ -23,7 +23,7 @@ def prepare_log(app_id:str|None, log:str|None=None, data:dict|None=None, app="op
 
     app_hash = app_id.rsplit("-")[-1]
     app_namespace = f"app-{app_hash}"
-    app = "web"
+    app = "algo"
     data = {"streams": [{ "stream": { "namespace":app_namespace, "app": app, "audit":"true", **data, **extra_labels }, "values": [ [ str(time.time_ns()), log ] ] }]}
     return app_namespace, data
 
