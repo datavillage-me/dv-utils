@@ -37,6 +37,17 @@ def audit_log(log:str|None=None, data:dict|None=None, app_id:str|None=None, app=
        if(r.status_code!=204):
           print(f"Error pushing log {r}", flush=True)
 
+def audit_log_basic(log:str|dict, level:str):
+    log_dict = {'level': level}
+    log_dict.update({'log': log} if type(log) == str else log)
+
+    data = {"streams": [{ "stream": { "app": "algo" }, "values": [ [ str(time.time_ns()), str(log_dict) ] ] }]}
+    app_namespace, _ = prepare_log(None, None, None)
+    if(app_namespace):
+       r = httpx.post(url=f'{get_loki_url()}/loki/api/v1/push', json=data, headers={"X-Scope-OrgID": app_namespace, "Content-Type": "application/json"})
+       if(r.status_code!=204):
+          print(f"Error pushing log {r}", flush=True) 
+
 async def audit_log_async(log:str|None=None, data:dict|None=None, app_id:str|None=None, app="algo", **extra_labels):
     app_namespace, data = prepare_log(app_id=app_id, log=log, data=data, app=app, **extra_labels)
     if(app_namespace):
