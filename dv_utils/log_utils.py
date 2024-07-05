@@ -43,15 +43,18 @@ def audit_log_basic(log:str|dict, level:str):
     log_dict.update({'log': log} if type(log) == str else log)
 
     data = {"streams": [{ "stream": { "app": "algo" }, "values": [ [ str(time.time_ns()), str(log_dict) ] ] }]}
-    app_namespace, _ = prepare_log(None, None, None)
-    if(app_namespace):
-        loki_url = get_loki_url()
-        if loki_url.upper() == 'STDOUT':
-            print(data)
-        elif loki_url.upper() == 'STDERR':
-            print(data, file=sys.stderr)
-        else:
-            __push_loki(loki_url, data, app_namespace)
+    app_namespace, _ = prepare_log(None, '', None)
+
+    loki_url = get_loki_url()
+    if loki_url.upper() == 'STDOUT':
+        print(log)
+    elif loki_url.upper() == 'STDERR':
+        print(log, file=sys.stderr)
+    elif(app_namespace):
+        __push_loki(loki_url, data, app_namespace)
+    else:
+        # code shouldn't get here
+        pass
        
 
 def __push_loki(url: str, data: dict, app_namespace: str):
