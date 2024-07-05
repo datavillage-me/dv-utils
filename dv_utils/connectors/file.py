@@ -1,13 +1,10 @@
 from dv_utils.connectors.connector import Configuration
 from urllib.parse import urlparse
 import requests
-import logging
 import os
 import copy
 import cloudscraper
-
-logger = logging.getLogger(__name__)
-
+from dv_utils import audit_log_basic
 
 class FileConfiguration(Configuration):
     schema_file = "file.json"
@@ -31,14 +28,13 @@ class FileConnector():
         file_names = self.config.file_name.split(',')
 
         if len(urls) != len(file_names):
-            logger.error(f'Length of urls and file list should be the same. Got {len(urls)} and {len(file_names)}')
+            audit_log_basic(f'Length of urls and file list should be the same. Got {len(urls)} and {len(file_names)}', 'ERROR')
             return
         
         for i in range(len(urls)):
             self.__get_file(urls[i].strip(), file_names[i].strip())
     
     def __get_file(self, url, file_name):
-        logger.info(f'Downloading {file_name} from {url}')
         if(self.config.use_scraper):
             scraper = cloudscraper.create_scraper()
             response = scraper.get(url)
@@ -50,12 +46,12 @@ class FileConnector():
             with open(os.path.join(self.config.download_directory, file_name), 'w') as file:
                 file.write(response.text)
         else:
-            logger.error(f'Could not download file {file_name} from {url}. Got {response.status_code}')
-        logger.info('done')
+            audit_log_basic(f'Could not download file {file_name} from {url}. Got {response.status_code}', 'ERROR')
+        audit_log_basic(f'Downloaded {file_name}', 'INFO')
     
     def __handle_response(self, response) -> bool :
         if(response.status_code > 399):
-            logger.warn(f"Response returned status code [{response.status_code}]")
+            audit_log_basic(f"Response returned status code [{response.status_code}]", 'WARN')
             return False
         
         return True
