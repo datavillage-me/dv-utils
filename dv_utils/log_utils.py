@@ -5,6 +5,14 @@ import time
 import os
 import httpx
 import sys
+from enum import Enum
+
+class LogLevel(Enum):
+    TRACE = 0
+    DEBUG = 10
+    INFO = 20
+    WARN = 30
+    ERROR = 40
 
 def prepare_log(app_id:str|None, log:str|None=None, data:dict|None=None, app="operator", **extra_labels):
     if(log is None and data is None):
@@ -31,11 +39,12 @@ def prepare_log(app_id:str|None, log:str|None=None, data:dict|None=None, app="op
 def get_loki_url() -> str:
     return os.environ.get("DV_LOKI", "http://loki.datavillage.svc.cluster.local:3100")
 
-def audit_log(log:str|None=None, data:dict|None=None, app_id:str|None=None, app="algo", level:str = 'INFO', **extra_labels):
-    log_dict = {'level': level}
+# Set default value of app back to 'algo'
+def audit_log(log:str|None=None, data:dict|None=None, app_id:str|None=None, app="michiel-local", level:LogLevel = LogLevel.INFO, **extra_labels):
+    log_dict = {'level': level.name}
     log_dict.update({'log': log} if type(log) == str else log)
 
-    data = {"streams": [{ "stream": { "app": f"{app}" }, "values": [ [ str(time.time_ns()), str(log_dict) ] ] }]}
+    log_json = {"streams": [{ "stream": { "app": f"{app}" }, "values": [ [ str(time.time_ns()), str(log_dict) ] ] }]}
     app_namespace, _ = prepare_log(app_id, '', None)
 
     loki_url = get_loki_url()
@@ -44,7 +53,7 @@ def audit_log(log:str|None=None, data:dict|None=None, app_id:str|None=None, app=
     elif loki_url.upper() == 'STDERR':
         print(log, file=sys.stderr)
     elif(app_namespace):
-        __push_loki(loki_url, data, app_namespace)
+        __push_loki(loki_url, log_json, app_namespace)
     else:
         # code shouldn't get here
         pass

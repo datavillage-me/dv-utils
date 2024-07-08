@@ -4,7 +4,7 @@ import requests
 import os
 import copy
 import cloudscraper
-from dv_utils import audit_log_basic
+from dv_utils import audit_log, LogLevel
 
 class FileConfiguration(Configuration):
     schema_file = "file.json"
@@ -28,7 +28,7 @@ class FileConnector():
         file_names = self.config.file_name.split(',')
 
         if len(urls) != len(file_names):
-            audit_log_basic(f'Length of urls and file list should be the same. Got {len(urls)} and {len(file_names)}', 'ERROR')
+            audit_log(f'Length of urls and file list should be the same. Got {len(urls)} and {len(file_names)}', level=LogLevel.ERROR)
             return
         
         for i in range(len(urls)):
@@ -46,12 +46,12 @@ class FileConnector():
             with open(os.path.join(self.config.download_directory, file_name), 'w') as file:
                 file.write(response.text)
         else:
-            audit_log_basic(f'Could not download file {file_name} from {url}. Got {response.status_code}', 'ERROR')
-        audit_log_basic(f'Downloaded {file_name}', 'INFO')
+            audit_log(f'Could not download file {file_name} from {url}. Got {response.status_code}', level=LogLevel.ERROR)
+        audit_log(f'Downloaded {file_name}')
     
     def __handle_response(self, response) -> bool :
         if(response.status_code > 399):
-            audit_log_basic(f"Response returned status code [{response.status_code}]", 'WARN')
+            audit_log(f"Response returned status code [{response.status_code}]", level=LogLevel.WARN)
             return False
         
         return True
