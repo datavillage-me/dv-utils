@@ -15,6 +15,14 @@
       "description": "Boolean to indicate if web scraping should be used to download from the url",
       "type": "boolean",
       "default": "false"
+    },
+    "file_format": {
+      "description": "Format of the files. If property is defined, the file will be fetched in memory with duckDB engine. Only csv, json or parquet are supported.",
+      "required": true
+    },
+    "encryption_key": {
+      "description": "AES 256 symetric encryption key used to encrypt files at rest - works only for parquet files format."
     }
+    
   }
 }

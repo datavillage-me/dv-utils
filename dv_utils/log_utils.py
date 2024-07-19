@@ -2,10 +2,20 @@
 This module defines utility functions for interaction with the loki server
 """
 import time
-import os
 import httpx
 import sys
 from enum import Enum
+from datetime import datetime
+
+from .settings import settings as default_settings
+
+class bcolors:
+    DEFAULT = '\033[97m'
+    TRACE = '\033[97m'
+    DEBUG = '\033[97m'
+    INFO = '\033[94m'
+    WARN = '\033[93m'
+    ERROR = '\033[91m'
 
 class LogLevel(Enum):
     TRACE = 0
@@ -15,10 +25,10 @@ class LogLevel(Enum):
     ERROR = 40
 
 def get_loki_url() -> str:
-    return os.environ.get("DV_LOKI", "http://loki.datavillage.svc.cluster.local:3100")
+    return default_settings.config("DV_LOKI", "http://loki.datavillage.svc.cluster.local:3100")
 
 def get_app_namespace() -> str | None:
-    cage_id = os.environ.get('DV_CAGE_ID', None)
+    cage_id = default_settings.config('DV_CAGE_ID', None)
     if not cage_id:
         return None
     else:
@@ -33,14 +43,28 @@ def create_body(log: str | dict | None, level: LogLevel):
 def audit_log(log:str|dict|None=None, level:LogLevel = LogLevel.INFO, **kwargs):
     loki_url = get_loki_url()
     if loki_url.upper() == 'STDOUT':
-        print(log)
+        time_string = datetime.now().strftime('%F %T,%f')[:-3]
+        print(__get_color_for_log_level(level)+time_string+" - "+level.name+" - "+log)
+        print(bcolors.DEFAULT)
     elif loki_url.upper() == 'STDERR':
         print(log, file=sys.stderr)
     else:
         data = create_body(log, level)
         __push_loki(loki_url, data)
        
-
+def __get_color_for_log_level(level):
+    if level==LogLevel.TRACE:
+        return bcolors.TRACE
+    elif level==LogLevel.DEBUG:
+        return bcolors.DEBUG
+    elif level==LogLevel.INFO:
+        return bcolors.INFO
+    elif level==LogLevel.WARN:
+        return bcolors.WARN
+    elif level==LogLevel.ERROR:
+        return bcolors.ERROR
+    else:
+        return bcolors.DEFAULT
 def __push_loki(url: str, data: dict):
     app_namespace = get_app_namespace()
 

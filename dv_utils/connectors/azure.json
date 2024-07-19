@@ -1,0 +1,27 @@
+{
+  "schema": {
+    "description": {
+      "description": "Description of the files structure on Azure.",
+      "required": true
+    },
+    "location": {
+      "description": "Location of the files on Azure. */* patterns are supported. {model} can be used and will be replaced by the models listed in the data contract.",
+      "required": true
+    },
+    "file_format": {
+      "description": "Format of the files hosted on Azure. csv, json or parquet are supported.",
+      "required": true
+    },
+    "encryption_key": {
+      "description": "AES 256 symmetric encryption key used to encrypt files at rest - works only for parquet files."
+    },
+    "connection_key": {
+      "description": "Connection key id to access the files on Azure.",
+      "required": false
+    },
+    "shared_access_token": {
+      "description": "Share access token (alternative solution to connection key) to access the files on Azure",
+      "required": false
+    }
+  }
+}
