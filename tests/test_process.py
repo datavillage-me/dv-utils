@@ -6,7 +6,7 @@ import unittest
 
 from dv_utils import default_settings, process_event_dummy
 
-default_settings.load_settings(".env.test")
+default_settings.load_settings(".env")
 
 
 class Test(unittest.TestCase):
