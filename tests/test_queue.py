@@ -1,13 +1,13 @@
 """
 Unit test for the redis and listen modules.
-Remark: to test the process module, you need to have a running redis instance and set it's address in the .env.test file.
+Remark: to test the process module, you need to have a running redis instance and set it's address in the .env.example file.
 """
 
 import unittest
 
 from dv_utils import RedisQueue, default_settings, process_event_dummy
 
-default_settings.load_settings(".env.test")
+default_settings.load_settings(".env")
 
 
 class Test(unittest.TestCase):

@@ -4,7 +4,7 @@ import requests
 import os
 import copy
 import cloudscraper
-from dv_utils import audit_log, LogLevel
+from ..log_utils import audit_log, LogLevel
 
 class FileConfiguration(Configuration):
     schema_file = "file.json"

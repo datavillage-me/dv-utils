@@ -7,6 +7,9 @@ import httpx
 import sys
 from enum import Enum
 
+from .settings import Settings
+from .settings import settings as default_settings
+
 class LogLevel(Enum):
     TRACE = 0
     DEBUG = 10
