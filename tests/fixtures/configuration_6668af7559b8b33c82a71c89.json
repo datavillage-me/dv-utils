@@ -1,7 +1,0 @@
-{
-  "connectorKeys":{
-    "description":"One file per model. One file per day",
-    "url":"https://github.com/datavillage-me/cage-process-fraud-detection-example/blob/main/data/label-bank1.csv",
-    "file_format":"csv"
-  }
-}
