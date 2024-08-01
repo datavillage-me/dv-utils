@@ -8,7 +8,7 @@ from ..settings import Settings
 from ..settings import settings as default_settings
 
 from ..connectors.connector import populate_configuration
-from ..connectors import s3,gcs,azure
+from ..connectors import s3,gcs,azure,file
 
 from datacontract.data_contract import DataContract
 from datacontract.data_contract import Server
@@ -24,16 +24,15 @@ class Contract:
         self.collaboration_space_id=None
         self.data_descriptor_id=None
         self.connector=None
-        self.data_connector_config_path=None
+        self.data_connector_config_location=default_settings.data_connector_config_location
 
-    def create_contract(self, data_descriptor: str,collaboration_space_id: str, data_descriptor_id: str,data_connector_config_path:str):
+    def create_contract(self, data_descriptor: str,collaboration_space_id: str, data_descriptor_id: str):
         #TODO
         #add version in custom data contract as an attribute in the console
         #code part with pre-defined dataset
         #look into filter datasets "echantillonage" to not load all the data https://docs.soda.io/soda-cl/filters.html#in-check-vs-dataset-filters
         self.collaboration_space_id=collaboration_space_id
         self.data_descriptor_id=data_descriptor_id
-        self.data_connector_config_path=data_connector_config_path
         if data_descriptor != None :
             self.__init_data_connector(data_descriptor)
             data_contract_yaml=self.__data_descriptor_to_data_contract(data_descriptor)
@@ -53,28 +52,34 @@ class Contract:
             data_source_type=data_descriptor["settings"]["type"] 
             logger.info(f"Initialise data connector for data source: type={data_source_type}")
             #initialise datavillage connector to get access to data source access keys
-            #TODO add other type
             if data_source_type=="s3":
                 config = s3.S3Configuration()
-                if self.data_connector_config_path!="":
-                    populate_configuration(self.data_descriptor_id,config,self.data_connector_config_path)
+                if self.data_connector_config_location!="":
+                    populate_configuration(self.data_descriptor_id,config,self.data_connector_config_location)
                 else:
                     populate_configuration(self.data_descriptor_id,config)
                 self.connector = s3.S3Connector(config)
             if data_source_type=="gcs":
                 config = gcs.GCSConfiguration()
-                if self.data_connector_config_path!="":
-                    populate_configuration(self.data_descriptor_id,config,self.data_connector_config_path)
+                if self.data_connector_config_location!="":
+                    populate_configuration(self.data_descriptor_id,config,self.data_connector_config_location)
                 else:
                     populate_configuration(self.data_descriptor_id,config)
                 self.connector = gcs.GCSConnector(config)
             if data_source_type=="azure":
                 config = azure.AZConfiguration()
-                if self.data_connector_config_path!="":
-                    populate_configuration(self.data_descriptor_id,config,self.data_connector_config_path)
+                if self.data_connector_config_location!="":
+                    populate_configuration(self.data_descriptor_id,config,self.data_connector_config_location)
                 else:
                     populate_configuration(self.data_descriptor_id,config)
                 self.connector = azure.AZConnector(config)
+            if data_source_type=="file":
+                config = file.FileConfiguration()
+                if self.data_connector_config_location!="":
+                    populate_configuration(self.data_descriptor_id,config,self.data_connector_config_location)
+                else:
+                    populate_configuration(self.data_descriptor_id,config)
+                self.connector = file.FileConnector(config)
         except Exception as inst:
             logger.error(Exception)
             raise RuntimeError(f"Unable to initialise connector: {inst}")

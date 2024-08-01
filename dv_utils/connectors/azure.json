@@ -12,10 +12,6 @@
       "description": "Format of the files hosted on Azure. csv, json or parquet are supported.",
       "required": true
     },
-    "ref_encryption_key": {
-      "description": "Name of the symetric encryption key (or http reference in the Key store - not yet supported) used to by the data provider to encrypte data.",
-      "required": true
-    },
     "encryption_key": {
       "description": "AES 256 symetric encryption key used to encrypt files at rest - works only for parquet files."
     },

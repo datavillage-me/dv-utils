@@ -29,18 +29,17 @@ class ContractQualityCheck:
     def __init__(self):
         self.client= Client()
         self.contract=Contract()
-  
-    def check_contract_for_data_descriptor(self, collaboration_space_id: str, data_descriptor_id: str,data_connector_config_path:str):
-        logger.info(f"Get data descriptor for collaboration_space_id:{collaboration_space_id} - data_descriptor_id:{data_descriptor_id}")
-        data_descriptor=self.client.get_data_descriptor(collaboration_space_id,data_descriptor_id,self.client.DATA_PROVIDER_COLLABORATOR_ROLE_VALUE)
-        if data_descriptor != None:
-            self.contract.create_contract(data_descriptor,collaboration_space_id,data_descriptor_id,data_connector_config_path)
-            self.__check_contract(self.contract,data_connector_config_path)
-        else:
-            logger.error(f"No data descriptor available for collaboration_space_id:{collaboration_space_id} - data_descriptor_id:{data_descriptor_id}")
+        self.data_connector_config_location=default_settings.data_connector_config_location
+    
+    def check_contract_for_data_descriptor(self, data_descriptor_id: str, data_descriptor: str):
+         if data_descriptor != None:
+            self.contract.create_contract(data_descriptor,None,data_descriptor_id)
+            return self.__check_contract(self.contract)
+         else:
+            logger.error(f"No data descriptor available: data_descriptor_id:{data_descriptor_id}")
             raise RuntimeError("Unable to check data contract")
     
-    def check_contracts_for_collaboration_space(self, collaboration_space_id: str,data_connector_config_path:str):
+    def check_contracts_for_collaboration_space(self, collaboration_space_id: str):
         scan_results={}
         logger.info(f"Get list of data providers for:{collaboration_space_id}")
         list_participants=self.client.get_list_of_participants(collaboration_space_id,self.client.DATA_PROVIDER_COLLABORATOR_ROLE_VALUE)
@@ -50,8 +49,8 @@ class ContractQualityCheck:
                 data_descriptors=participant.get("dataDescriptors")
                 if len(data_descriptors) > 0:
                     for data_descriptor in data_descriptors:
-                        self.contract.create_contract(data_descriptor,collaboration_space_id,data_descriptor["id"],data_connector_config_path)
-                        scan_results[data_descriptor["id"]]=self.__check_contract(self.contract,data_connector_config_path)
+                        self.contract.create_contract(data_descriptor,collaboration_space_id,data_descriptor["id"])
+                        scan_results[data_descriptor["id"]]=self.__check_contract(self.contract)
                 else:
                     logger.error(f"No data descriptor available for collaboration_space_id:{collaboration_space_id}")
                     raise RuntimeError("Unable to check data contract")
@@ -61,13 +60,13 @@ class ContractQualityCheck:
         return scan_results
 
 
-    def __check_contract(self,contract: Contract,data_connector_config_path:str):   
+    def __check_contract(self,contract: Contract):   
         try:
             if contract.connector!=None and contract.connector.config.location!=None and contract.connector.config.file_format!=None:
                 #use duck db to fetch data for quality check
                 logger.info(f"Connect with duckdb")
                 con = duckdb.connect(database=":memory:")
-                con = contract.connector.add_duck_db_connection(con,contract.connector.config.ref_encryption_key)
+                con = contract.connector.add_duck_db_connection(con)
                 #loop on all models
                 data_contract_spec=contract.data_contract.get_data_contract_specification()
                 for model_key, model_value in data_contract_spec.models.items():

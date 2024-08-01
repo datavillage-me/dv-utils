@@ -7,20 +7,21 @@ from ..log_utils import audit_log, LogLevel
 
 logger = logging.getLogger(__name__)
 
+#TODO add workload identity federation pattern
 class S3Configuration(Configuration):
     schema_file = "s3.json"
     connect_type ="s3"
-
+    
     description = None
     location = None
     file_format = None
     ref_encryption_key = None
-    encryption_key = None
 
     region = None
     key_id = None
     secret = None
 
+#TODO add writer (for data user output connector)
 class S3Connector():
     NAMING_CONVENTION_MODEL="{{model}}"
 
@@ -29,12 +30,12 @@ class S3Connector():
     def __init__(self, config: S3Configuration) -> None:
         self.config = copy.copy(config)
 
-    def add_duck_db_connection(self,duckdb,ref_encryption_key: str):
+    def add_duck_db_connection(self,duckdb):
         description = self.config.description
         location = self.config.location
         file_format = self.config.file_format
-        ref_encryption_key = self.config.ref_encryption_key
         encryption_key=self.config.encryption_key
+        ref_encryption_key = self.config.connector_id
 
         region=self.config.region
         key_id=self.config.key_id
@@ -54,12 +55,12 @@ class S3Connector():
         if options!="":
                 options=","+options
         if self.config.file_format=="parquet":
-            if self.config.ref_encryption_key!="":
-                encryption_config_str=", encryption_config = {footer_key: '"+self.config.ref_encryption_key+"'}"
+            if self.config.encryption_key!="":
+                encryption_config_str=", encryption_config = {footer_key: '"+self.config.connector_id+"'}"
             return f"read_parquet('{data_source_location_for_model}'{options}{encryption_config_str})"
-        elif self.file_format=="json":
+        elif self.config.file_format=="json":
             return f"read_json('{data_source_location_for_model}'{options})"
-        elif self.file_format=="csv":
+        elif self.config.file_format=="csv":
             return f"read_csv('{data_source_location_for_model}'{options})"
         else:
             logger.error("Format not supported by duckdb")

@@ -1,0 +1,10 @@
+{
+  "connectorKeys":{
+    "description":"One file per model. One file per day",
+    "location":"gs://{model}/mule-accounts0-encrypted.parquet",
+    "file_format":"parquet",
+    "encryption_key":"GZs0DsMHdXr39mzkFwHwTHvCuUlID3HB",
+    "key_id":"GOOGSEWQD542VA3VEQDRF3YH",
+    "secret":"4Sij34a6ysiOX8y4fm3f4XUaEnIEGJycOiznqDzY"
+  }
+}

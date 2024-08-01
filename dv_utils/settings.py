@@ -42,5 +42,7 @@ class Settings:
         self.redis_host = config("REDIS_SERVICE_HOST", default="localhost", cast=str)
         self.redis_port = config("REDIS_SERVICE_PORT", default="6379", cast=str)
 
+        self.data_connector_config_location = config("DATA_CONNECTOR_CONFIG_LOCATION", default="localhost", cast=str)
+
 
 settings = Settings()

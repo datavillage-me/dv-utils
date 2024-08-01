@@ -1,19 +1,35 @@
 import json
+import requests
 import logging
 import importlib.resources as importlib_resources
 
 logger = logging.getLogger(__name__)
 
-
+#TODO add configuration reader from http endpoint if config_dir is http end point (certifier)
 class Configuration():
     schema_file: str = None
+    connector_id: str = None
 
     def __str__(self):
         return str([(var, getattr(self, var)) for var in vars(self)])
 
 
 def populate_configuration(connector_id, config: Configuration, config_dir='/resources/data') -> Configuration:
+    
+    config.connector_id=connector_id
+
     filename = f'{config_dir}/configuration_{connector_id}.json'
+
+    #check if file is available on http end point or stored on mounted dick
+    try:
+        if filename.startswith("http"):
+            data=requests.get(filename).json()
+        else:
+            with open(filename, 'r') as file:
+                data = json.load(file)
+    except Exception as inst:
+        logger.error(f"Not able to open connector configuration file: {Exception}")
+        raise
 
     schema = None
     with importlib_resources.open_text('dv_utils.connectors', config.schema_file) as config_file:

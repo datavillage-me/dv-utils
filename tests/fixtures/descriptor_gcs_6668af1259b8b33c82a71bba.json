@@ -1,0 +1,11 @@
+{
+   "name":"Mule accounts",
+   "description":"List of mule accounts",
+   "schema":"muleaccounts:\n    type: table\n    fields:\n        account_id:\n            type: varchar\n            required: true\n            pii: true\n            classification: sensitive\n        account_holder_name:\n            type: varchar\n            required: true\n            pii: true\n            classification: sensitive\n        risk_score:\n            type: integer\n            required: true\n        red_flag:\n            type: varchar\n            required: true",
+   "syntheticData":"- type: csv\n    model: mule_accounts\n    description: An example list of line items.\n    data: |\n      account_id,account_holder_name,risk_score,red_flag\n      \"GB82EVJA51473322705367\",\"Miroslaw Jockel-Bähr\",42,{\"red_flags\": [{\"flagged_date\": \"2023-09-10\",  \"reason\": \"High volume of transactions in a short period\"}]}\n      \"GB76JXYP06950698775020\",\"Eusebiu Ababei\",46,{\"red_flags\": [{\"flagged_date\": \"2020-01-05\",  \"reason\": \"Frequent changes in account holder details\"}]}\n      \"GB79ZOQS74631591035364\",\"Макар Чумак\",69,{\"red_flags\": [{\"flagged_date\": \"2021-04-17\",  \"reason\": \"Multiple accounts linked to the same holder\"}]}\n      \"GB03ONJJ55359020348942\",\"Marie Droz\",64,{\"red_flags\": [{\"flagged_date\": \"2022-03-16\",  \"reason\": \"Transactions to or from known suspicious entities\"}]}\n      \"GB80MVRO37480546607882\",\"Matija Raljević \",55,{\"red_flags\": [{\"flagged_date\": \"2023-10-08\",  \"reason\": \"Dormant accounts suddenly becoming active\"}]}",
+   "settings":{
+      "type":"gcs"
+   },
+   "kind":"Custom",
+   "id":"6668af1259b8b33c82a71bba"
+}

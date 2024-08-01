@@ -3,6 +3,7 @@ Unit test for the contract module.
 """
 
 import unittest
+import json
 
 from dv_utils import ContractQualityCheck, default_settings, process_event_dummy
 
@@ -12,7 +13,7 @@ collaboration_space_id="ekmdkbfa"
 data_descriptor_id_s3="6668af7559b8b33c82a71c87"
 data_descriptor_id_gcs="6668af1259b8b33c82a71bba"
 data_descriptor_id_azure="6668af5c59b8b33c82a71c72"
-data_connector_config_dir = "tests/fixtures"
+data_descriptor_id_file="6668af7559b8b33c82a71c89"
 
 
 class Test(unittest.TestCase):
@@ -25,33 +26,52 @@ class Test(unittest.TestCase):
 
 
     def test_contract_quality_check(self):
+        """
+        Try to check a contract of a custom dataset on github with file connector. Use this test to check a quality check that does not pass
+        """
+        filename = f'tests/fixtures/descriptor_file_{data_descriptor_id_file}.json'
+        with open(filename, 'r') as file:
+            data = json.load(file)
+            self.ContractQualityCheck.check_contract_for_data_descriptor(data_descriptor_id_file,data)
+
+
         # """
         # Try to check a contract of a custom dataset on s3
         # """
-        # self.ContractQualityCheck.check_contract_for_data_descriptor(collaboration_space_id,data_descriptor_id_s3,data_connector_config_dir)
+        # filename = f'tests/fixtures/descriptor_s3_{data_descriptor_id_s3}.json'
+        # with open(filename, 'r') as file:
+        #     data = json.load(file)
+        #     self.ContractQualityCheck.check_contract_for_data_descriptor(data_descriptor_id_s3,data)
+
 
         # """
         # Try to check a contract of a custom dataset on gcs
         # """
-        # self.ContractQualityCheck.check_contract_for_data_descriptor(collaboration_space_id,data_descriptor_id_gcs,data_connector_config_dir)
+        # filename = f'tests/fixtures/descriptor_gcs_{data_descriptor_id_gcs}.json'
+        # with open(filename, 'r') as file:
+        #     data = json.load(file)
+        #     self.ContractQualityCheck.check_contract_for_data_descriptor(data_descriptor_id_gcs,data)
 
         # """
         # Try to check a contract of a custom dataset on azure
         # """
-        # self.ContractQualityCheck.check_contract_for_data_descriptor(collaboration_space_id,data_descriptor_id_azure,data_connector_config_dir)
+        # filename = f'tests/fixtures/descriptor_az_{data_descriptor_id_azure}.json'
+        # with open(filename, 'r') as file:
+        #     data = json.load(file)
+        #     self.ContractQualityCheck.check_contract_for_data_descriptor(data_descriptor_id_azure,data)
 
-        """
-        Try to check contract for a collaboration space
-        """
-        self.ContractQualityCheck.check_contracts_for_collaboration_space(collaboration_space_id,data_connector_config_dir)
+        # """
+        # Try to check contract for a collaboration space
+        # """
+        # self.ContractQualityCheck.check_contracts_for_collaboration_space(collaboration_space_id)
 
         # """
         # Try to check a contract of a non-existing collaboration space
         # """
-        # self.ContractQualityCheck.check_contracts_for_collaboration_space( None, data_connector_config_dir)
+        # self.ContractQualityCheck.check_contracts_for_collaboration_space( None, config_dir)
 
         # """
         # Try to check a contract of a non-existing descriptor 
         # """
-        # self.ContractQualityCheck.check_contract_for_data_descriptor(collaboration_space_id,None,data_connector_config_dir)
+        # self.ContractQualityCheck.check_contract_for_data_descriptor(collaboration_space_id,None)
 

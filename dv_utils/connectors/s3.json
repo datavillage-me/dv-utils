@@ -12,10 +12,6 @@
       "description": "Format of the files hosted on S3. csv, json or parquet are supported.",
       "required": true
     },
-    "ref_encryption_key": {
-      "description": "Name of the symetric encryption key (or http reference in the Key store - not yet supported) used to by the data provider to encrypte data.",
-      "required": true
-    },
     "region": {
       "description": "AWS region where the files are hosted.",
       "required": true
