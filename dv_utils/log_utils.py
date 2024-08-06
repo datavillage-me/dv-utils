@@ -30,7 +30,7 @@ def create_body(log: str | dict | None, level: LogLevel):
 
     return {"streams": [{ "stream": { "app": "algo" }, "values": [ [ str(time.time_ns()), str(log_dict) ] ] }]} 
 
-def audit_log(log:str|dict|None=None, level:LogLevel = LogLevel.INFO):
+def audit_log(log:str|dict|None=None, level:LogLevel = LogLevel.INFO, **kwargs):
     loki_url = get_loki_url()
     if loki_url.upper() == 'STDOUT':
         print(log)
