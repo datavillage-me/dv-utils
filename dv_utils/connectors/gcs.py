@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 #TODO add workload identity federation pattern
 class GCSConfiguration(Configuration):
     schema_file = "gcs.json"
-    connect_type ="gcs"
+    connect_type ="Gcs"
     
     description = None
     location = None
@@ -30,9 +30,6 @@ class GCSConnector():
         self.config = copy.copy(config)
 
     def add_duck_db_connection(self,duckdb):
-        description = self.config.description
-        location = self.config.location
-        file_format = self.config.file_format
         encryption_key=self.config.encryption_key
         ref_encryption_key = self.config.connector_id
         
@@ -46,10 +43,12 @@ class GCSConnector():
         return duckdb
     
     #TODO code duplicate with other connectors.
-    def get_duckdb_source(self,model_key: str,options:str):
+    def get_duckdb_source(self,model_key: str="",options:str=""):
         #replace {model} by the model key if any reference to {model}  in the data source location
-        data_source_location_for_model=self.config.location.replace(self.NAMING_CONVENTION_MODEL.format(),model_key)
-        logger.info(f"Used data source location for model {model_key}: {data_source_location_for_model}")
+        data_source_location_for_model=self.config.location
+        if model_key!= "":
+            data_source_location_for_model=self.config.location.replace(self.NAMING_CONVENTION_MODEL.format(),model_key)
+        logger.debug(f"Used data source location: {data_source_location_for_model}")
         if options!="":
                 options=","+options
         if self.config.file_format=="parquet":

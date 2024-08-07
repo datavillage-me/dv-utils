@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class FileConfiguration(Configuration):
     schema_file = "file.json"
-    connect_type ="file"
+    connect_type ="File"
 
     url = None
     location = None
@@ -70,8 +70,6 @@ class FileConnector():
         return True
     
     def add_duck_db_connection(self,duckdb):
-        location = self.config.url
-        file_format = self.config.file_format
         encryption_key=self.config.encryption_key
         ref_encryption_key = self.config.connector_id
 
@@ -80,10 +78,12 @@ class FileConnector():
         return duckdb
     
     #TODO code duplicate with other connectors.
-    def get_duckdb_source(self,model_key: str,options:str):
+    def get_duckdb_source(self,model_key: str="",options:str=""):
         #replace {model} by the model key if any reference to {model}  in the data source location
-        data_source_location_for_model=self.config.location.replace(self.NAMING_CONVENTION_MODEL.format(),model_key)
-        logger.info(f"Used data source location for model {model_key}: {data_source_location_for_model}")
+        data_source_location_for_model=self.config.location
+        if model_key!= "":
+            data_source_location_for_model=self.config.location.replace(self.NAMING_CONVENTION_MODEL.format(),model_key)
+        logger.debug(f"Used data source location: {data_source_location_for_model}")
         if options!="":
                 options=","+options
         if self.config.file_format=="parquet":

@@ -5,7 +5,7 @@ Unit test for the contract module.
 import unittest
 import json
 
-from dv_utils import ContractQualityCheck, default_settings, process_event_dummy
+from dv_utils import ContractManager, default_settings
 
 default_settings.load_settings(".env")
 
@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
     """
 
     def setUp(self):
-        self.ContractQualityCheck = ContractQualityCheck()
+        self.ContractManager = ContractManager()
 
 
     def test_contract_quality_check(self):
@@ -32,46 +32,45 @@ class Test(unittest.TestCase):
         filename = f'tests/fixtures/descriptor_file_{data_descriptor_id_file}.json'
         with open(filename, 'r') as file:
             data = json.load(file)
-            self.ContractQualityCheck.check_contract_for_data_descriptor(data_descriptor_id_file,data)
+            self.ContractManager.check_contract_for_data_descriptor(data_descriptor_id_file,data)
 
 
-        # """
-        # Try to check a contract of a custom dataset on s3
-        # """
-        # filename = f'tests/fixtures/descriptor_s3_{data_descriptor_id_s3}.json'
-        # with open(filename, 'r') as file:
-        #     data = json.load(file)
-        #     self.ContractQualityCheck.check_contract_for_data_descriptor(data_descriptor_id_s3,data)
+        """
+        Try to check a contract of a custom dataset on s3
+        """
+        filename = f'tests/fixtures/descriptor_s3_{data_descriptor_id_s3}.json'
+        with open(filename, 'r') as file:
+            data = json.load(file)
+            self.ContractManager.check_contract_for_data_descriptor(data_descriptor_id_s3,data)
 
 
-        # """
-        # Try to check a contract of a custom dataset on gcs
-        # """
-        # filename = f'tests/fixtures/descriptor_gcs_{data_descriptor_id_gcs}.json'
-        # with open(filename, 'r') as file:
-        #     data = json.load(file)
-        #     self.ContractQualityCheck.check_contract_for_data_descriptor(data_descriptor_id_gcs,data)
+        """
+        Try to check a contract of a custom dataset on gcs
+        """
+        filename = f'tests/fixtures/descriptor_gcs_{data_descriptor_id_gcs}.json'
+        with open(filename, 'r') as file:
+            data = json.load(file)
+            self.ContractManager.check_contract_for_data_descriptor(data_descriptor_id_gcs,data)
 
-        # """
-        # Try to check a contract of a custom dataset on azure
-        # """
-        # filename = f'tests/fixtures/descriptor_az_{data_descriptor_id_azure}.json'
-        # with open(filename, 'r') as file:
-        #     data = json.load(file)
-        #     self.ContractQualityCheck.check_contract_for_data_descriptor(data_descriptor_id_azure,data)
+        """
+        Try to check a contract of a custom dataset on azure
+        """
+        filename = f'tests/fixtures/descriptor_az_{data_descriptor_id_azure}.json'
+        with open(filename, 'r') as file:
+            data = json.load(file)
+            self.ContractManager.check_contract_for_data_descriptor(data_descriptor_id_azure,data)
 
-        # """
-        # Try to check contract for a collaboration space
-        # """
-        # self.ContractQualityCheck.check_contracts_for_collaboration_space(collaboration_space_id)
+        """
+        Try to check contract for a collaboration space
+        """
+        self.ContractManager.check_contracts_for_collaboration_space(collaboration_space_id)
 
-        # """
-        # Try to check a contract of a non-existing collaboration space
-        # """
-        # self.ContractQualityCheck.check_contracts_for_collaboration_space( None, config_dir)
+        """
+        Try to check a contract of a non-existing collaboration space
+        """
+        self.ContractManager.check_contracts_for_collaboration_space( None)
 
-        # """
-        # Try to check a contract of a non-existing descriptor 
-        # """
-        # self.ContractQualityCheck.check_contract_for_data_descriptor(collaboration_space_id,None)
-
+        """
+        Try to check a contract of a non-existing descriptor 
+        """
+        self.ContractManager.check_contract_for_data_descriptor(None,None)

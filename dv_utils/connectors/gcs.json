@@ -13,7 +13,7 @@
       "required": true
     },
     "encryption_key": {
-      "description": "AES 256 symetric encryption key used to encrypt files at rest - works only for parquet files."
+      "description": "AES 256 symmetric encryption key used to encrypt files at rest - works only for parquet files."
     },
     "key_id": {
       "description": "Key id to access the files on Google GCS.",

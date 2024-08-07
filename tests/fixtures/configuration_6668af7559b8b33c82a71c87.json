@@ -1,0 +1,11 @@
+{
+  "connectorKeys":{
+    "description":"One file per model. One file per day",
+    "location":"s3://{model}/mule-accounts2-encrypted.parquet",
+    "file_format":"parquet",
+    "region":"eu-north-1",
+    "encryption_key":"${ENCRYPTION_KEY_6668af7559b8b33c82a71c87}",
+    "key_id":"${KEY_ID_6668af7559b8b33c82a71c87}",
+    "secret":"${SECRET_6668af7559b8b33c82a71c87}"
+  }
+}

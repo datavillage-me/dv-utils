@@ -1,8 +1,7 @@
-# Utility python library for interaction with data-village middleware
+# Utility python library for interaction with datavillage gateway and components within the confidential environment
 
 ## About
-This repository contains a set of utilities for the development of application within the cage, especially with respect
-to interfacing with the middleware APIs.
+This repository contains a set of utilities for the development of application within the confidential environment.
 
 ## Release process
 The version management and git tagging must be done in accordance with the versioning practices described

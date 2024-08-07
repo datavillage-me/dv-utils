@@ -20,44 +20,10 @@ class Client:
     Http client to interact with the Datavillage API.
     """
     DATA_PROVIDER_COLLABORATOR_ROLE_VALUE="DataProvider"
-
-    DATA_PROVIDER_COLLABORATOR_ROLE_VALUE="DataProvider"
     DATA_CONSUMER_COLLABORATOR_ROLE_VALUE="DataConsumer"
 
     def __init__(self, settings: Settings = None):
         self.settings: Settings = settings or default_settings
-    
-    def get_data_descriptor(self, collaboration_space_id: str, data_descriptor_id: str, role: str):
-        """
-        Returns the data descriptor as json 
-        """
-        try:
-            list_participants = self.request(
-                f"/collaborationSpaces/{collaboration_space_id}/collaborators"
-            )
-            if role!=None:
-                filtered_participants = [x for x in list_participants if x["role"]==role]
-            else:
-                filtered_participants = [x for x in list_participants]
-            data_descriptors = [ 
-                descriptor for participant in filtered_participants    
-                for descriptor in participant.get("dataDescriptors", [])
-                if descriptor["id"] == data_descriptor_id
-                ]
-            return data_descriptors[0]
-        except Exception as e:
-            logger.error(e)
-            return None
-    
-    def get_data_descriptors_for_collaboration_space(self, collaboration_space_id: str, role: str):
-        """
-        Returns the data descriptors as array of json 
-        """
-        list_participants=self.get_list_of_participants(collaboration_space_id,role)
-        if list_participants != None and len(list_participants)>0:
-            for participant in list_participants:
-                client_id=participant["clientId"]
-                data_descriptors=participant.get("dataDescriptors")
 
     def get_list_of_participants(self, collaboration_space_id: str, role: str):
         """
@@ -68,7 +34,7 @@ class Client:
                 f"/collaborationSpaces/{collaboration_space_id}/collaborators"
             )
             if role!=None:
-                filtered_participants = [x for x in list_participants if x["role"]==role]
+                filtered_participants = [x for x in list_participants if role == None or role == x["role"]]
             else:
                 filtered_participants=list_participants
             return filtered_participants
@@ -110,7 +76,7 @@ class Client:
 
         # currently only 'inferences' and 'explains' are supported
         if not filename in ["inferences", "explains"]:
-            raise Exception("Unsupported result file name: " + filename)
+            logger.error("Unsupported result file name: " + filename)
 
         self.request(
             f"/clients/{self.settings.collaboration_space_owner_id}/applications/{self.settings.collaboration_space_id}/activeUsers/{user_id}/{filename}",

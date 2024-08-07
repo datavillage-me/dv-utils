@@ -13,15 +13,15 @@
       "required": true
     },
     "encryption_key": {
-      "description": "AES 256 symetric encryption key used to encrypt files at rest - works only for parquet files."
+      "description": "AES 256 symmetric encryption key used to encrypt files at rest - works only for parquet files."
     },
     "connection_key": {
       "description": "Connection key id to access the files on Azure.",
-      "required": true
+      "required": false
     },
-    "share_access_token": {
+    "shared_access_token": {
       "description": "Share access token (alternative solution to connection key) to access the files on Azure",
-      "required": true
+      "required": false
     }
   }
 }

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 #TODO add workload identity federation pattern
 class AZConfiguration(Configuration):
     schema_file = "azure.json"
-    connect_type ="azure"
+    connect_type ="Azure"
     
     description = None
     location = None
@@ -18,7 +18,7 @@ class AZConfiguration(Configuration):
     encryption_key = None
 
     connection_key = None
-    share_access_token = None
+    shared_access_token = None
 
 #TODO add writer (for data user output connector)
 class AZConnector():
@@ -30,14 +30,9 @@ class AZConnector():
         self.config = copy.copy(config)
 
     def add_duck_db_connection(self,duckdb):
-        description = self.config.description
-        location = self.config.location
-        file_format = self.config.file_format
         encryption_key=self.config.encryption_key
         ref_encryption_key = self.config.connector_id
-
         connection_key=self.config.connection_key
-        share_access_token=self.config.share_access_token
 
         if encryption_key!=None:
             duckdb.sql(f"PRAGMA add_parquet_key('{ref_encryption_key}', '{encryption_key}')")
@@ -47,10 +42,12 @@ class AZConnector():
         return duckdb
     
     #TODO code duplicate with other connectors.
-    def get_duckdb_source(self,model_key: str,options:str):
+    def get_duckdb_source(self,model_key: str="",options:str=""):
         #replace {model} by the model key if any reference to {model}  in the data source location
-        data_source_location_for_model=self.config.location.replace(self.NAMING_CONVENTION_MODEL.format(),model_key)
-        logger.info(f"Used data source location for model {model_key}: {data_source_location_for_model}")
+        data_source_location_for_model=self.config.location
+        if model_key!= "":
+            data_source_location_for_model=self.config.location.replace(self.NAMING_CONVENTION_MODEL.format(),model_key)
+        logger.debug(f"Used data source location: {data_source_location_for_model}")
         if options!="":
                 options=","+options
         if self.config.file_format=="parquet":

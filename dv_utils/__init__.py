@@ -2,7 +2,7 @@
 Datavillage python utils for building algorithm running in confidential collaboration space
 """
 from .client import Client
-from .datasets.contract_quality_check import ContractQualityCheck
+from .datasets.contract_manager import ContractManager
 from .listener import DefaultListener
 from .process import process_event_dummy
 from .redis import RedisQueue

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 #TODO add workload identity federation pattern
 class S3Configuration(Configuration):
     schema_file = "s3.json"
-    connect_type ="s3"
+    connect_type ="S3"
     
     description = None
     location = None
@@ -31,9 +31,6 @@ class S3Connector():
         self.config = copy.copy(config)
 
     def add_duck_db_connection(self,duckdb):
-        description = self.config.description
-        location = self.config.location
-        file_format = self.config.file_format
         encryption_key=self.config.encryption_key
         ref_encryption_key = self.config.connector_id
 
@@ -48,10 +45,12 @@ class S3Connector():
         return duckdb
     
     #TODO code duplicate with other connectors.
-    def get_duckdb_source(self,model_key: str,options:str):
+    def get_duckdb_source(self,model_key: str="",options:str=""):
         #replace {model} by the model key if any reference to {model}  in the data source location
-        data_source_location_for_model=self.config.location.replace(self.NAMING_CONVENTION_MODEL.format(),model_key)
-        logger.info(f"Used data source location for model {model_key}: {data_source_location_for_model}")
+        data_source_location_for_model=self.config.location
+        if model_key!= "":
+            data_source_location_for_model=self.config.location.replace(self.NAMING_CONVENTION_MODEL.format(),model_key)
+        logger.debug(f"Used data source location: {data_source_location_for_model}")
         if options!="":
                 options=","+options
         if self.config.file_format=="parquet":
