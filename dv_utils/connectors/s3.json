@@ -1,0 +1,31 @@
+{
+  "schema": {
+    "description": {
+      "description": "Description of the files structure on S3.",
+      "required": true
+    },
+    "location": {
+      "description": "Location of the files on S3. */* patterns are supported. {model} can be used and will be replaced by the models listed in the data contract.",
+      "required": true
+    },
+    "file_format": {
+      "description": "Format of the files hosted on S3. csv, json or parquet are supported.",
+      "required": true
+    },
+    "region": {
+      "description": "AWS region where the files are hosted.",
+      "required": true
+    },
+    "encryption_key": {
+      "description": "AES 256 symmetric encryption key used to encrypt files at rest - works only for parquet files."
+    },
+    "key_id": {
+      "description": "Key id to access the files on AWS S3.",
+      "required": true
+    },
+    "secret": {
+      "description": "Secret to access the files on AWS S3",
+      "required": true
+    }
+  }
+}

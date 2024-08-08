@@ -5,9 +5,9 @@ build-backend = "poetry.masonry.api"
 [tool]
 [tool.poetry]
 name = "dv-utils"
-version = "0.2.19"
-description = "DataVillage Python utils for interaction with the middleware and building algo processing code"
-authors = ["Arne Goeteyn <arne@datavillage.me>"]
+version = "1.0.0"
+description = "Datavillage python utils for building algorithm running in confidential environment"
+authors = ["Arne Goeteyn <arne@datavillage.ai>"]
 readme = "README.md"
 repository = "https://github.com/datavillage-me/dv-utils"
 
@@ -24,8 +24,14 @@ mkdocstrings = "^0.19.0"
 mkdocstrings-python = "^0.7.1"
 mkdocs-material = "^8.4.2"
 httpx = "^0.24.0"
-oauth2client="^4.1.3"
-google-api-python-client="^2.113.0"
+oauth2client = "^4.1.3"
+google-api-python-client =" ^2.113.0"
+soda-core = "^3.3.10"
+duckdb = "^1.0.0"
+datacontract-cli = "^0.9.7"
+pyyaml = "^5.4.1"
+
+
 
 [tool.poetry.dev-dependencies]
 mypy = "*"
