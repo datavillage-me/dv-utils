@@ -2,13 +2,11 @@
 This module defines utility functions for interaction with the loki server
 """
 import time
-import os
 import httpx
 import sys
 from enum import Enum
 from datetime import datetime
 
-from .settings import Settings
 from .settings import settings as default_settings
 
 class bcolors:
