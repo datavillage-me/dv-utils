@@ -44,7 +44,7 @@ def audit_log(log:str|dict|None=None, level:LogLevel = LogLevel.INFO, **kwargs):
     loki_url = get_loki_url()
     if loki_url.upper() == 'STDOUT':
         time_string = datetime.now().strftime('%F %T,%f')[:-3]
-        print(__get_color_for_log_level(level)+time_string+" - "+level.name+" - "+log)
+        print(__get_color_for_log_level(level)+time_string+" - "+level.name+" - "+str(log))
         print(bcolors.DEFAULT)
     elif loki_url.upper() == 'STDERR':
         print(log, file=sys.stderr)
