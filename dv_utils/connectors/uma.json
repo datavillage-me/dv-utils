@@ -1,0 +1,12 @@
+{
+  "schema": {
+    "path": {
+      "description": "Path to access within the POD",
+      "required": true
+    },
+    "description": {
+      "description": "Description of the files in the POD",
+      "required": false
+    }
+  }
+}
