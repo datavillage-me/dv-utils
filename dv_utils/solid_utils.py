@@ -1,5 +1,15 @@
 import requests
-from dv_utils import audit_log
+from dv_utils import audit_log, LogLevel
+
+def get_token(webId: str, appId: str, user_name: str, password: str) -> str:
+  token_endpoint = f"https://solid-idp.datavillage.me/token"  # TODO: how to configure solid idp?
+  query_params = {'webid': webId, 'appid': appId}
+  print(f"uname {user_name}, password {password}")
+  res = requests.get(token_endpoint, params=query_params, auth=(user_name, password))
+  if not res.ok:
+    audit_log(f"Could not get token from solid idp. Got [{res.status_code}]: {res.text}", LogLevel.ERROR)
+
+  return res.json()['token']
 
 """
 Fetches permission ticket to access a resource through UMA flow
