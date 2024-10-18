@@ -34,5 +34,29 @@ def get_permission_ticket(pod_url: str, path: str) -> tuple[str, str]:
   return (uma_uri, ticket)
 
 def get_uma_configuration(uma_uri: str) -> dict:
-  res = requests.get(f"{uma_uri}{'' if uma_uri.endswith('/') else '/'}.well-known/uma2-configuration")
+  res = requests.get(f"{uma_uri}/.well-known/uma2-configuration")
   return res.json()
+
+def get_vc_configuration(vc_uri: str) -> dict:
+  res = requests.get(f"{vc_uri}/.well-known/vc-configuration")
+  return res.json()
+
+def get_all_access_grants(vc_server: str, solid_id_token: str) -> list[dict]:
+  vc_derive_endpoint = get_vc_configuration(vc_server)['derivationService']
+  print(f"derive endpoint {vc_derive_endpoint}")
+  body = {
+    'verifiableCredential': {
+      "@context": ['https://www.w3.org/2018/credentials/v1'],
+      'credentialSubject': {}
+    }
+  }
+
+  headers = {
+    'Authorization': f"Bearer {solid_id_token}",
+    'Content-Type': 'application/json'
+  }
+
+  res = requests.post(vc_derive_endpoint, json=body, headers=headers)
+  res_json = res.json()
+  print(f"got response from vc {res.status_code}: {res_json}")
+  return res_json
