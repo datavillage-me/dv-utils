@@ -37,7 +37,7 @@
       }
     ],
    "settings":{
-      "type":"Azure"
+      "connector":"Azure"
    },
    "kind":"Custom",
    "id":"6668af5c59b8b33c82a71c72"

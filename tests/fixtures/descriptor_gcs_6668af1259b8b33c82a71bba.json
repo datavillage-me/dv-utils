@@ -37,7 +37,7 @@
       }
     ],
    "settings":{
-      "type":"Gcs"
+      "connector":"Gcs"
    },
    "kind":"Custom",
    "id":"6668af1259b8b33c82a71bba"

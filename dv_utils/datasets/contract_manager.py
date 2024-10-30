@@ -23,7 +23,7 @@ class ContractManager:
     
     def get_contract_for_data_descriptor(self, data_descriptor_id: str, data_descriptor:str):
         if data_descriptor != None:
-            data_source_type=data_descriptor["settings"]["type"] 
+            data_source_type=data_descriptor["settings"]["connector"] 
             contract=Contract()
             contract.create_contract(data_descriptor_id,data_source_type,data_descriptor)
             return contract

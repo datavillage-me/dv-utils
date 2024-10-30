@@ -37,7 +37,7 @@
       }
     ],
    "settings":{
-      "type":"S3"
+      "connector":"S3"
    },
    "kind":"Custom",
    "id":"6668af7559b8b33c82a71c87"

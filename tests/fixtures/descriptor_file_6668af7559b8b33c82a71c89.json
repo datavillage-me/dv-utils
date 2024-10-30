@@ -17,7 +17,7 @@
       }
     },
    "settings":{
-      "type":"File"
+      "connector":"File"
    },
    "kind":"Custom",
    "id":"6668af7559b8b33c82a71c89"
