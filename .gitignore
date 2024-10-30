@@ -4,5 +4,5 @@
 *.ipynb_checkpoints*
 dist/
 *.egg-info/
-
+scrapbook/
 .DS_Store
