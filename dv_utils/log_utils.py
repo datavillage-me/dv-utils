@@ -2,13 +2,11 @@
 This module defines utility functions for interaction with the loki server
 """
 import time
-import os
 import httpx
 import sys
 from enum import Enum
 from datetime import datetime
 
-from .settings import Settings
 from .settings import settings as default_settings
 
 class bcolors:
@@ -42,11 +40,11 @@ def create_body(log: str | dict | None, level: LogLevel):
 
     return {"streams": [{ "stream": { "app": "algo" }, "values": [ [ str(time.time_ns()), str(log_dict) ] ] }]} 
 
-def audit_log(log:str|dict|None=None, level:LogLevel = LogLevel.INFO):
+def audit_log(log:str|dict|None=None, level:LogLevel = LogLevel.INFO, **kwargs):
     loki_url = get_loki_url()
     if loki_url.upper() == 'STDOUT':
         time_string = datetime.now().strftime('%F %T,%f')[:-3]
-        print(__get_color_for_log_level(level)+time_string+" - "+level.name+" - "+log)
+        print(__get_color_for_log_level(level)+time_string+" - "+level.name+" - "+str(log))
         print(bcolors.DEFAULT)
     elif loki_url.upper() == 'STDERR':
         print(log, file=sys.stderr)
