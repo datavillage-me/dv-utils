@@ -73,7 +73,6 @@ class Contract:
                     logger.debug(f"Running engine soda-core")
                     logger.debug(f"Export data contract to soda checks")
                     sodacl_contract=self.data_contract.export("sodacl")
-                
                     scan = Scan()
                     scan.add_duckdb_connection(duckdb_connection=con, data_source_name=self.connector.config.connector_id)
                     scan.set_data_source_name(self.connector.config.connector_id)
@@ -113,27 +112,30 @@ class Contract:
                 else:
                     populate_configuration(self.data_descriptor_id,config)
                 self.connector = s3.S3Connector(config)
-            if data_source_type=="Gcs":
+            elif data_source_type=="Gcs":
                 config = gcs.GCSConfiguration()
                 if self.data_connector_config_location!="":
                     populate_configuration(self.data_descriptor_id,config,self.data_connector_config_location)
                 else:
                     populate_configuration(self.data_descriptor_id,config)
                 self.connector = gcs.GCSConnector(config)
-            if data_source_type=="Azure":
+            elif data_source_type=="Azure":
                 config = azure.AZConfiguration()
                 if self.data_connector_config_location!="":
                     populate_configuration(self.data_descriptor_id,config,self.data_connector_config_location)
                 else:
                     populate_configuration(self.data_descriptor_id,config)
                 self.connector = azure.AZConnector(config)
-            if data_source_type=="File":
+            elif data_source_type=="File":
                 config = file.FileConfiguration()
                 if self.data_connector_config_location!="":
                     populate_configuration(self.data_descriptor_id,config,self.data_connector_config_location)
                 else:
                     populate_configuration(self.data_descriptor_id,config)
                 self.connector = file.FileConnector(config)
+            else:
+                logger.error(f"Unable to initialise connector, data source type {data_source_type} unknown.")
+                raise
         except Exception as inst:
             logger.error(f"Unable to initialise connector: {inst}")
             raise 
@@ -145,7 +147,7 @@ class Contract:
                 pass
             else:
                 data_contract_json={}
-                data_contract_json["dataContractSpecification"]="0.9.3"
+                data_contract_json["dataContractSpecification"]="1.1.0"
                 data_contract_json["id"]=f"urn:datacontract:{data_descriptor['id']}"
                 data_contract_json["info"]={"title":data_descriptor["name"],"version": "custom","description": data_descriptor["description"]}
                 if isinstance(data_descriptor["schema"], dict):
