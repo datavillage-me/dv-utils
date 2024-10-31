@@ -1,44 +1,44 @@
 {
-   "name":"Mule accounts",
-   "description":"List of mule accounts",
-   "schema":{
-      "muleaccounts": {
-        "type": "table",
-        "fields": {
-          "account_id": {
-            "type": "varchar",
-            "required": true,
-            "pii": true,
-            "classification": "sensitive"
-          },
-          "account_holder_name": {
-            "type": "varchar",
-            "required": true,
-            "pii": true,
-            "classification": "sensitive"
-          },
-          "risk_score": {
-            "type": "integer",
-            "required": true
-          },
-          "red_flag": {
-            "type": "varchar",
-            "required": true
-          }
+  "name": "Mule accounts",
+  "description": "List of mule accounts",
+  "schema": {
+    "muleaccounts": {
+      "type": "table",
+      "fields": {
+        "account_id": {
+          "type": "varchar",
+          "required": true,
+          "pii": true,
+          "classification": "sensitive"
+        },
+        "account_holder_name": {
+          "type": "varchar",
+          "required": true,
+          "pii": true,
+          "classification": "sensitive"
+        },
+        "risk_score": {
+          "type": "integer",
+          "required": true
+        },
+        "red_flag": {
+          "type": "varchar",
+          "required": true
         }
       }
-    },
-   "syntheticData":[
-      {
-        "type": "csv",
-        "model": "mule_accounts",
-        "description": "An example list of line items.",
-        "data": "account_id,account_holder_name,risk_score,red_flag\n\"GB82EVJA51473322705367\",\"Miroslaw Jockel-Bähr\",42,{\"red_flags\": [{\"flagged_date\": \"2023-09-10\",  \"reason\": \"High volume of transactions in a short period\"}]}\n\"GB76JXYP06950698775020\",\"Eusebiu Ababei\",46,{\"red_flags\": [{\"flagged_date\": \"2020-01-05\",  \"reason\": \"Frequent changes in account holder details\"}]}\n\"GB79ZOQS74631591035364\",\"Макар Чумак\",69,{\"red_flags\": [{\"flagged_date\": \"2021-04-17\",  \"reason\": \"Multiple accounts linked to the same holder\"}]}\n\"GB03ONJJ55359020348942\",\"Marie Droz\",64,{\"red_flags\": [{\"flagged_date\": \"2022-03-16\",  \"reason\": \"Transactions to or from known suspicious entities\"}]}\n\"GB80MVRO37480546607882\",\"Matija Raljević \",55,{\"red_flags\": [{\"flagged_date\": \"2023-10-08\",  \"reason\": \"Dormant accounts suddenly becoming active\"}]}\n"
-      }
-    ],
-   "settings":{
-      "type":"Azure"
-   },
-   "kind":"Custom",
-   "id":"6668af5c59b8b33c82a71c72"
+    }
+  },
+  "syntheticData": [
+    {
+      "type": "csv",
+      "model": "mule_accounts",
+      "description": "An example list of line items.",
+      "data": "account_id,account_holder_name,risk_score,red_flag\n\"GB82EVJA51473322705367\",\"Miroslaw Jockel-Bähr\",42,{\"red_flags\": [{\"flagged_date\": \"2023-09-10\",  \"reason\": \"High volume of transactions in a short period\"}]}\n\"GB76JXYP06950698775020\",\"Eusebiu Ababei\",46,{\"red_flags\": [{\"flagged_date\": \"2020-01-05\",  \"reason\": \"Frequent changes in account holder details\"}]}\n\"GB79ZOQS74631591035364\",\"Макар Чумак\",69,{\"red_flags\": [{\"flagged_date\": \"2021-04-17\",  \"reason\": \"Multiple accounts linked to the same holder\"}]}\n\"GB03ONJJ55359020348942\",\"Marie Droz\",64,{\"red_flags\": [{\"flagged_date\": \"2022-03-16\",  \"reason\": \"Transactions to or from known suspicious entities\"}]}\n\"GB80MVRO37480546607882\",\"Matija Raljević \",55,{\"red_flags\": [{\"flagged_date\": \"2023-10-08\",  \"reason\": \"Dormant accounts suddenly becoming active\"}]}\n"
+    }
+  ],
+  "settings": {
+    "connector": "Azure"
+  },
+  "kind": "Custom",
+  "id": "6668af5c59b8b33c82a71c72"
 }

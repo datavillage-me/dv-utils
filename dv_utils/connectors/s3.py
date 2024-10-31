@@ -15,7 +15,7 @@ class S3Configuration(Configuration):
     description = None
     location = None
     file_format = None
-    ref_encryption_key = None
+    encryption_key = None
 
     region = None
     key_id = None

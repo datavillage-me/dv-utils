@@ -1,24 +1,24 @@
 {
-   "name":"Mule accounts",
-   "description":"List of mule accounts",
-   "schema":{
-      "labels": {
-        "type": "table",
-        "fields": {
-          "UETR": {
-            "type": "varchar",
-            "required": true
-          },
-          "Class": {
-            "type": "varchar",
-            "required": true
-          }
+  "name": "Mule accounts",
+  "description": "List of mule accounts",
+  "schema": {
+    "labels": {
+      "type": "table",
+      "fields": {
+        "UETR": {
+          "type": "varchar",
+          "required": true
+        },
+        "Class": {
+          "type": "varchar",
+          "required": true
         }
       }
-    },
-   "settings":{
-      "type":"File"
-   },
-   "kind":"Custom",
-   "id":"6668af7559b8b33c82a71c89"
+    }
+  },
+  "settings": {
+    "connector": "File"
+  },
+  "kind": "Custom",
+  "id": "6668af7559b8b33c82a71c89"
 }
