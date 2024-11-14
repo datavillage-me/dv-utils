@@ -90,8 +90,8 @@ def get_all_access_grants(vc_derive_endpoint: str, solid_id_token: str) -> list[
 
   res = requests.post(vc_derive_endpoint, json=body, headers=headers)
   res_json = res.json()
-  print(f"got response from vc {res.status_code}: {res_json}")
-  return res_json
+
+  return res_json['verifiableCredential']
 
 def get_access_grant_for_resource(vc_derive_endpoint: str, solid_id_token: str, resource_uri: str) -> list[dict]:
   body = {
@@ -117,7 +117,10 @@ def get_access_grant_for_resource(vc_derive_endpoint: str, solid_id_token: str, 
   
   return res.json()['verifiableCredential']
 
-def get_uma_token(solid_idp_token: str, resource_uri: str, access_grant: dict):
+"""
+Fetches a UMA token that can be used to fetch a resource from an ACP POD
+"""
+def get_uma_token(solid_idp_token: str, resource_uri: str, access_request: dict | None = None):
   # Call 1: get premission ticket from uma
   (uma_uri, permission_ticket) = get_permission_ticket(resource_uri)
 
@@ -125,11 +128,34 @@ def get_uma_token(solid_idp_token: str, resource_uri: str, access_grant: dict):
   uma_configuration = get_uma_configuration(uma_uri)
   uma_token_endpoint = uma_configuration['token_endpoint']
 
+  # If no access grant given: find needed access grant
+  if access_request is None:
+    vc_configuration = get_vc_configuration(uma_configuration['verifiable_credential_issuer'])
+    access_request = find_access_request(solid_idp_token, resource_uri, vc_configuration['derivationService'])
+
   # Call 3: get uma token without scopes
-  uma_unscoped_token = __request_uma_unscoped_token(access_grant, uma_token_endpoint, permission_ticket) 
+  uma_unscoped_token = __request_uma_unscoped_token(access_request, uma_token_endpoint, permission_ticket) 
 
   # Call 4: get uma token with scopes
   return __request_uma_scoped_token(uma_token_endpoint, permission_ticket, solid_idp_token, uma_unscoped_token)
+
+def find_access_request(solid_idp_token: str, resource_uri: str,  vc_derive_endpoint: str) -> dict:
+  filtered_access_requests = [r for r in get_all_access_grants(vc_derive_endpoint, solid_idp_token) if __is_access_request_for_resource(resource_uri, r)]
+  if not len(filtered_access_requests):
+    audit_log(f"Could not find access request for resource {resource_uri}", LogLevel.ERROR)
+    return None
+  
+  return filtered_access_requests[0]
+
+def __is_access_request_for_resource(resource_uri: str, access_request: dict) -> bool:
+
+  # TODO: make edge case better
+  provided_consent = access_request['credentialSubject'].get('providedConsent', {'forPersonalData': ''})
+  resource_in_request = provided_consent['forPersonalData']
+  inherit = provided_consent.get('inherit', 'false') == 'true'
+
+  # Grant can be used if the request gave access to the resource, or to a superfolder with inherit=true
+  return resource_in_request == resource_uri or (inherit and resource_uri.startswith(resource_in_request))
 
 
 
