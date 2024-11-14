@@ -153,9 +153,6 @@ def __request_uma_unscoped_token(access_grant_body: dict, uma_token_endpoint:str
     'Content-Type': 'application/x-www-form-urlencoded'
   }
 
-  with open('athumi_suggestion_first_request.json', 'w') as f:
-    json.dump(payload, f)
-
   res = requests.post(uma_token_endpoint, payload, headers=headers)
   
   if not res.ok:
@@ -163,8 +160,7 @@ def __request_uma_unscoped_token(access_grant_body: dict, uma_token_endpoint:str
     return ""
   
   res_json = res.json()
-  with open('athumi_suggestion_first_response.json', 'w') as f:
-    json.dump(res_json, f)
+
   return res_json['access_token']
 
 # As suggested by Athumi
@@ -183,15 +179,11 @@ def __request_uma_scoped_token(uma_token_endpoint: str, permission_ticket: str, 
 
   res = requests.post(uma_token_endpoint, payload, headers=headers)
 
-  with open('athumi_suggestion_second_request.json', 'w') as f:
-    json.dump(payload, f)
-
   if not res.ok:
     audit_log(f"Could not get scoped uma token. Got [{res.status_code}]: {res.text}")
     return ""
   
   res_json = res.json()
-  with open('athumi_suggestion_second_response.json', 'w') as f:
-    json.dump(res_json, f)
+
   return res_json['access_token']
 
