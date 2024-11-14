@@ -7,19 +7,24 @@ from dv_utils import audit_log, LogLevel
 # TODO: encapsulate methods + clean up the file
 
 def get_acp_from_pod_url(pod_url: str, path: str) -> str:
+  resource_uri = f"{pod_url}/{path}"
+
   # Get cage solid token
   cage_webid = get_cage_webid()
   cage_appid = get_cage_appid()
   cage_token = get_dv_soidp_token(cage_webid, cage_appid)
-
-  # Find UMA and VC
-
-  # Find access request
+  print(cage_token)
 
   # Get UMA token
+  uma_token = get_uma_token(cage_token, resource_uri)
 
   # Get file
-  pass
+  res = requests.get(resource_uri, headers={'Authorization': f"Bearer {uma_token}"})
+  if not res.ok:
+    audit_log(f"Could not get file with uma token. Got [{res.status_code}]: {res.text}")
+    return None
+  
+  return res.text
 
 def get_cage_webid() -> str:
   api_url = environ['DV_URL']
@@ -89,6 +94,10 @@ def get_all_access_grants(vc_derive_endpoint: str, solid_id_token: str) -> list[
   }
 
   res = requests.post(vc_derive_endpoint, json=body, headers=headers)
+  if not res.ok:
+    audit_log(f"Could not get all access grants. Got [{res.status_code}]: {res.text}", LogLevel.ERROR)
+    return None
+
   res_json = res.json()
 
   return res_json['verifiableCredential']
