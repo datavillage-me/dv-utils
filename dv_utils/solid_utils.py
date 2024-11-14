@@ -1,12 +1,44 @@
 import requests
 import json
 import base64
+from os import environ
 from dv_utils import audit_log, LogLevel
 
-def get_token(webId: str, appId: str, user_name: str, password: str) -> str:
+# TODO: encapsulate methods + clean up the file
+
+def get_acp_from_pod_url(pod_url: str, path: str) -> str:
+  # Get cage solid token
+  cage_webid = get_cage_webid()
+  cage_appid = get_cage_appid()
+  cage_token = get_dv_soidp_token(cage_webid, cage_appid)
+
+  # Find UMA and VC
+
+  # Find access request
+
+  # Get UMA token
+
+  # Get file
+  pass
+
+def get_cage_webid() -> str:
+  api_url = environ['DV_URL']
+  space_id = environ['DV_APP_ID']
+  return f"{api_url}/.well-known/{space_id}/webid"
+
+def get_cage_appid() -> str:
+  api_url = environ['DV_URL']
+  space_id = environ['DV_APP_ID']
+  # TODO: figure out how we handle our appids
+  return f"{api_url}/.well-known/{space_id}/appid" 
+
+def get_dv_soidp_token(webId: str, appId: str) -> str:
   token_endpoint = f"https://solid-idp.datavillage.me/token"  # TODO: how to configure solid idp?
+  user_name = environ['SOLID_IDP_USERNAME']
+  password = environ['SOLID_IDP_PASSWORD']
+
   query_params = {'webid': webId, 'appid': appId}
-  print(f"uname {user_name}, password {password}")
+
   res = requests.get(token_endpoint, params=query_params, auth=(user_name, password))
   if not res.ok:
     audit_log(f"Could not get token from solid idp. Got [{res.status_code}]: {res.text}", LogLevel.ERROR)

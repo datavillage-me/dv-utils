@@ -1,0 +1,14 @@
+{
+  "schema": {
+    "description": {
+      "description": "Description of the file in the Solid POD"
+    },
+    "path": {
+      "description": "Path to the file from the root folder",
+      "required": true
+    },
+    "podUrl": {
+      "description": "URL of the POD of the user"
+    }
+  }
+}
