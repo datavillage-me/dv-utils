@@ -131,31 +131,8 @@ def get_uma_token(solid_idp_token: str, resource_uri: str, access_grant: dict):
   # Call 4: get uma token with scopes
   return __request_uma_scoped_token(uma_token_endpoint, permission_ticket, solid_idp_token, uma_unscoped_token)
 
-# Following docs
-# def __request_uma_unscoped_token(solid_idp_token: str, uma_token_endpoint:str, permission_ticket: str) -> str:
-#   payload = {
-#     'ticket': permission_ticket,
-#     'grant_type': 'urn:ietf:params:oauth:grant-type:uma-ticket',
-#     'claim_token': solid_idp_token,
-#     'claim_token_format': 'http://openid.net/specs/openid-connect-core-1_0.html#IDToken'
-#   }
 
-#   headers = {
-#     'Content-Type': 'application/x-www-form-urlencoded'
-#   }
 
-#   res = requests.post(uma_token_endpoint, payload, headers=headers)
-  
-#   if not res.ok:
-#     audit_log(f"Could not get unscoped uma token. Got [{res.status_code}]: {res.text}", LogLevel.ERROR)
-#     return ""
-  
-#   res_json = res.json()
-#   with open('first_response.json', 'w') as f:
-#     json.dump(res_json, f)
-#   return res_json['access_token']
-
-# As suggested by Athumi
 def __request_uma_unscoped_token(access_grant_body: dict, uma_token_endpoint:str, permission_ticket: str) -> str:
   verifiable_presentation = {
     '@context': ["https://www.w3.org/2018/credentials/v1"],
@@ -218,39 +195,3 @@ def __request_uma_scoped_token(uma_token_endpoint: str, permission_ticket: str, 
     json.dump(res_json, f)
   return res_json['access_token']
 
-# Following docs
-# def __request_uma_scoped_token(uma_token_endpoint: str, permission_ticket: str, access_grant: dict, unscoped_token: str) -> str:
-#   verifiable_presentation = {
-#     '@context': ['https://www.w3.org/2018/credentials/v1'],
-#     'type': 'VerifiablePresentation',
-#     'verifiableCredential': [access_grant]
-#   }
-
-#   with open('vp.json', 'w') as f:
-#     json.dump(verifiable_presentation, f)
-
-#   vp_bytes = json.dumps(verifiable_presentation).encode()
-#   vp_b64 = base64.b64encode(vp_bytes).decode()
-  
-#   payload = {
-#     'ticket': permission_ticket,
-#     'grant_type': 'urn:ietf:params:oauth:grant-type:uma-ticket',
-#     'claim_token': vp_b64,
-#     'claim_token_format': "https://www.w3.org/TR/vc-data-model/#json-ld",
-#     'rpt': unscoped_token
-#   }
-
-#   headers = {
-#     'Content-Type': 'application/x-www-form-urlencoded'
-#   }
-
-#   res = requests.post(uma_token_endpoint, payload, headers=headers)
-
-#   if not res.ok:
-#     audit_log(f"Could not get scoped uma token. Got [{res.status_code}]: {res.text}")
-#     return ""
-  
-#   res_json = res.json()
-#   with open('second_response.json', 'w') as f:
-#     json.dump(res_json, f)
-#   return res_json['access_token']
