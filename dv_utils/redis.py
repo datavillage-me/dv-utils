@@ -46,7 +46,7 @@ class RedisQueue:
         """
         self.redis.xgroup_destroy("events", self.consumer_group)
 
-    def publish(self, data: dict, create_consumer_group=False) -> str:
+    def publish(self, data: dict, create_consumer_group=False, stream_name="events") -> str:
         """
         publish an event to the redis queue
 
@@ -62,7 +62,7 @@ class RedisQueue:
             self.create_consummer_group()
 
         msg_id = self.redis.xadd(
-            "events",
+            stream_name,
             {
                 "msg_data": json.dumps(
                     data | {"msg_dt": datetime.datetime.utcnow().isoformat()}
