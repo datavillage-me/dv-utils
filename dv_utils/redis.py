@@ -28,12 +28,12 @@ class RedisQueue:
         self.consumer_name = consumer_name
         self.redis = redis.Redis(host, port, db=0, ssl=True, ssl_ca_certs=os.environ.get("TLS_CAFILE",None))
 
-    def create_consummer_group(self) -> None:
+    def create_consummer_group(self, stream_names = ["events"]) -> None:
         """
         Create the consummer group if it does not exist
         """
         try:
-            self.redis.xgroup_create("events", self.consumer_group, mkstream=True)
+            [self.redis.xgroup_create(s, self.consumer_group, mkstream=True) for s in stream_names]
         except redis.exceptions.ResponseError as error:
             if str(error).startswith("BUSYGROUP"):
                 pass
@@ -73,7 +73,7 @@ class RedisQueue:
         )
         return msg_id
 
-    def listen_once(self, timeout=120):
+    def listen_once(self, timeout=120, stream_name = "events"):
         """
         Listen to the redis queue until one message is obtained, or timeout is reached
         :param timeout: timeout delay in seconds
@@ -83,7 +83,7 @@ class RedisQueue:
         messages = self.redis.xreadgroup(
             "consummers",
             self.consumer_name,
-            {"events": ">"},
+            {stream_name: ">"},
             noack=True,
             count=1,
             block=timeout * 1000,
