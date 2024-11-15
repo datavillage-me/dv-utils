@@ -46,13 +46,14 @@ class RedisQueue:
         """
         self.redis.xgroup_destroy("events", self.consumer_group)
 
-    def publish(self, data: dict, create_consumer_group=False) -> str:
+    def publish(self, data: dict, create_consumer_group=False, stream_name="events") -> str:
         """
         publish an event to the redis queue
 
         Args:
             data (dict): event data to publish
             create_consumer_group (bool, optional): create the consummer group if it does not exist. Defaults to True.
+            stream_name (str, default=events): the stream_name to publish the events to
 
         Returns:
             str: message id
@@ -62,7 +63,7 @@ class RedisQueue:
             self.create_consummer_group()
 
         msg_id = self.redis.xadd(
-            "events",
+            stream_name,
             {
                 "msg_data": json.dumps(
                     data | {"msg_dt": datetime.datetime.utcnow().isoformat()}
@@ -77,6 +78,7 @@ class RedisQueue:
         """
         Listen to the redis queue until one message is obtained, or timeout is reached
         :param timeout: timeout delay in seconds
+        :param stream_name: name of the stream to listen to
         :return: the received message, or None
         """
         logging.debug("Waiting for message...")
