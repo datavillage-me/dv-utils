@@ -53,6 +53,7 @@ class RedisQueue:
         Args:
             data (dict): event data to publish
             create_consumer_group (bool, optional): create the consummer group if it does not exist. Defaults to True.
+            stream_name (str, default=events): the stream_name to publish the events to
 
         Returns:
             str: message id
@@ -77,6 +78,7 @@ class RedisQueue:
         """
         Listen to the redis queue until one message is obtained, or timeout is reached
         :param timeout: timeout delay in seconds
+        :param stream_name: name of the stream to listen to
         :return: the received message, or None
         """
         logging.debug("Waiting for message...")
