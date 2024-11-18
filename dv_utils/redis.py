@@ -32,13 +32,14 @@ class RedisQueue:
         """
         Create the consummer group if it does not exist
         """
-        try:
-            [self.redis.xgroup_create(s, self.consumer_group, mkstream=True) for s in stream_names]
-        except redis.exceptions.ResponseError as error:
-            if str(error).startswith("BUSYGROUP"):
-                pass
-            else:
-                raise error
+        for s in stream_names:
+            try:
+                self.redis.xgroup_create(s, self.consumer_group, mkstream=True)
+            except redis.exceptions.ResponseError as error:
+                if str(error).startswith("BUSYGROUP"):
+                    pass
+                else:
+                    raise error
 
     def destroy_consummer_group(self) -> None:
         """
