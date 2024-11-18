@@ -5,7 +5,7 @@ import requests
 
 uname = os.environ.get('SOLID_IDP_USERNAME')
 password = os.environ.get('SOLID_IDP_PASSWORD')
-token = solid_utils.get_dv_soidp_token('https://control-plane.gke.datavillage.me/.well-known/imohmkmd/webid', 'https://control-plane.gke.datavillage.me/.well-known/imohmkmd/appid')
+token = solid_utils.get_dv_soidp_token('https://control-plane.gke.datavillage.me/.well-known/imohmkmd/webid', 'https://epc.datavillage.me/appid')
 # token = ""
 print(token)
 pod_url = "https://storage.sandbox-nl-pod.datanutsbedrijf.be/b6738617-737c-4a03-8178-b21543efe44b"
@@ -13,6 +13,9 @@ file_path = "sndk/userProfile.ttl"
 vc_derive = "https://vc.sandbox-nl-pod.datanutsbedrijf.be/derive"
 
 # all_grants = solid_utils.get_all_access_grants(vc_derive, token)
+
+# with open('grants.json', 'w') as f:
+#   json.dump(all_grants, f)
 
 grant = {
     "id": "https://vc.sandbox-nl-pod.datanutsbedrijf.be/vc/d44e5b02-7053-4647-8e4e-6bbe502fb4f3",
