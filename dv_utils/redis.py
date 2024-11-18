@@ -28,12 +28,12 @@ class RedisQueue:
         self.consumer_name = consumer_name
         self.redis = redis.Redis(host, port, db=0, ssl=True, ssl_ca_certs=os.environ.get("TLS_CAFILE",None))
 
-    def create_consummer_group(self) -> None:
+    def create_consummer_group(self, stream_names = ["events"]) -> None:
         """
         Create the consummer group if it does not exist
         """
         try:
-            self.redis.xgroup_create("events", self.consumer_group, mkstream=True)
+            [self.redis.xgroup_create(s, self.consumer_group, mkstream=True) for s in stream_names]
         except redis.exceptions.ResponseError as error:
             if str(error).startswith("BUSYGROUP"):
                 pass
@@ -46,13 +46,14 @@ class RedisQueue:
         """
         self.redis.xgroup_destroy("events", self.consumer_group)
 
-    def publish(self, data: dict, create_consumer_group=False) -> str:
+    def publish(self, data: dict, create_consumer_group=False, stream_name="events") -> str:
         """
         publish an event to the redis queue
 
         Args:
             data (dict): event data to publish
             create_consumer_group (bool, optional): create the consummer group if it does not exist. Defaults to True.
+            stream_name (str, default=events): the stream_name to publish the events to
 
         Returns:
             str: message id
@@ -62,7 +63,7 @@ class RedisQueue:
             self.create_consummer_group()
 
         msg_id = self.redis.xadd(
-            "events",
+            stream_name,
             {
                 "msg_data": json.dumps(
                     data | {"msg_dt": datetime.datetime.utcnow().isoformat()}
@@ -73,17 +74,18 @@ class RedisQueue:
         )
         return msg_id
 
-    def listen_once(self, timeout=120):
+    def listen_once(self, timeout=120, stream_name = "events"):
         """
         Listen to the redis queue until one message is obtained, or timeout is reached
         :param timeout: timeout delay in seconds
+        :param stream_name: name of the stream to listen to
         :return: the received message, or None
         """
         logging.debug("Waiting for message...")
         messages = self.redis.xreadgroup(
             "consummers",
             self.consumer_name,
-            {"events": ">"},
+            {stream_name: ">"},
             noack=True,
             count=1,
             block=timeout * 1000,
