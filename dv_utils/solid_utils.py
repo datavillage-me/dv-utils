@@ -4,21 +4,17 @@ import base64
 from os import environ
 from dv_utils import audit_log, LogLevel
 
-# TODO: encapsulate methods + clean up the file
-
-def get_acp_from_pod_url(pod_url: str, path: str) -> str:
+"""
+Fetches a resource from a pod using acp protocol and return as string
+"""
+def get_acp_from_pod_url(pod_url: str, path: str, solid_oidp_token: str = None) -> str:
   resource_uri = f"{pod_url}/{path}"
 
-  # Get cage solid token
-  cage_webid = get_cage_webid()
-  cage_appid = get_cage_appid()
-  cage_token = get_dv_soidp_token(cage_webid, cage_appid)
-  print(cage_token)
+  if not solid_oidp_token:
+    solid_oidp_token = __get_dv_soidp_token()
 
-  # Get UMA token
-  uma_token = get_uma_token(cage_token, resource_uri)
+  uma_token = get_uma_token(solid_oidp_token, resource_uri)
 
-  # Get file
   res = requests.get(resource_uri, headers={'Authorization': f"Bearer {uma_token}"})
   if not res.ok:
     audit_log(f"Could not get file with uma token. Got [{res.status_code}]: {res.text}")
@@ -26,23 +22,14 @@ def get_acp_from_pod_url(pod_url: str, path: str) -> str:
   
   return res.text
 
-def get_cage_webid() -> str:
-  api_url = environ['DV_URL']
-  space_id = environ['DV_APP_ID']
-  return f"{api_url}/.well-known/{space_id}/webid"
-
-def get_cage_appid() -> str:
-  api_url = environ['DV_URL']
-  space_id = environ['DV_APP_ID']
-  # TODO: figure out how we handle our appids
-  return f"{api_url}/.well-known/{space_id}/appid" 
-
-def get_dv_soidp_token(webId: str, appId: str) -> str:
+def __get_dv_soidp_token() -> str:
   token_endpoint = f"https://solid-idp.datavillage.me/token"  # TODO: how to configure solid idp?
+  webid = __get_cage_webid()
+  appid = __get_cage_appid()
   user_name = environ['SOLID_IDP_USERNAME']
   password = environ['SOLID_IDP_PASSWORD']
 
-  query_params = {'webid': webId, 'appid': appId}
+  query_params = {'webid': webid, 'appid': appid}
 
   res = requests.get(token_endpoint, params=query_params, auth=(user_name, password))
   if not res.ok:
@@ -50,8 +37,40 @@ def get_dv_soidp_token(webId: str, appId: str) -> str:
 
   return res.json()['token']
 
+def __get_cage_webid() -> str:
+  api_url = environ['DV_URL']
+  space_id = environ['DV_APP_ID']
+  return f"{api_url}/.well-known/{space_id}/webid"
+
+def __get_cage_appid() -> str:
+  api_url = environ['DV_URL']
+  space_id = environ['DV_APP_ID']
+  return f"{api_url}/.well-known/{space_id}/appid" 
+
 """
-Fetches permission ticket to access a resource through UMA flow
+Fetches a UMA token that can be used to fetch a resource from an ACP POD
+"""
+def get_uma_token(solid_idp_token: str, resource_uri: str, access_request: dict | None = None):
+  # Call 1: get premission ticket from uma
+  (uma_uri, permission_ticket) = get_permission_ticket(resource_uri)
+
+  # Call 2: get uma configuration
+  uma_configuration = get_uma_configuration(uma_uri)
+  uma_token_endpoint = uma_configuration['token_endpoint']
+
+  # If no access grant given: find needed access grant
+  if access_request is None:
+    vc_configuration = get_vc_configuration(uma_configuration['verifiable_credential_issuer'])
+    access_request = find_access_request(solid_idp_token, resource_uri, vc_configuration['derivationService'])
+
+  # Call 3: get uma token without scopes
+  uma_unscoped_token = __request_uma_unscoped_token(access_request, uma_token_endpoint, permission_ticket) 
+
+  # Call 4: get uma token with scopes
+  return __request_uma_scoped_token(uma_token_endpoint, permission_ticket, solid_idp_token, uma_unscoped_token)
+
+"""
+Fetches permission ticket by doing an unauthenticated fetch
 returns (uma_uri, permission ticket)
 """
 def get_permission_ticket(resource_uri: str) -> tuple[str, str]:
@@ -80,7 +99,21 @@ def get_vc_configuration(vc_uri: str) -> dict:
   res = requests.get(f"{vc_uri}/.well-known/vc-configuration")
   return res.json()
 
-def get_all_access_grants(vc_derive_endpoint: str, solid_id_token: str) -> list[dict]:
+"""
+Fetches all access requests for a Solid OIDP token from the vc and finds the first one applicable to the given resource
+"""
+def find_access_request(solid_idp_token: str, resource_uri: str,  vc_derive_endpoint: str) -> dict:
+  filtered_access_requests = [r for r in get_all_access_requests(vc_derive_endpoint, solid_idp_token) if __is_access_request_for_resource(resource_uri, r)]
+  if not len(filtered_access_requests):
+    audit_log(f"Could not find access request for resource {resource_uri}", LogLevel.ERROR)
+    return None
+  
+  return filtered_access_requests[0]
+
+"""
+Fetches all access requests for a given Solid OIDP token
+"""
+def get_all_access_requests(vc_derive_endpoint: str, solid_id_token: str) -> list[dict]:
   body = {
     'verifiableCredential': {
       "@context": ['https://www.w3.org/2018/credentials/v1'],
@@ -102,60 +135,6 @@ def get_all_access_grants(vc_derive_endpoint: str, solid_id_token: str) -> list[
 
   return res_json['verifiableCredential']
 
-def get_access_grant_for_resource(vc_derive_endpoint: str, solid_id_token: str, resource_uri: str) -> list[dict]:
-  body = {
-    'verifiableCredential': {
-      'credentialSubject': {
-      'providedConsent': {
-        'forPersonalData': resource_uri
-      }
-    }
-    }
-  }
-
-  headers = {
-    'Authorization': f"Bearer {solid_id_token}",
-    'Content-Type': 'application/json'
-  }
-
-  res = requests.post(vc_derive_endpoint, json=body, headers=headers)
-
-  if not res.ok:
-    audit_log(f"Could not search grants at VC. Got [{res.status_code}]: {res.text}")
-    return []
-  
-  return res.json()['verifiableCredential']
-
-"""
-Fetches a UMA token that can be used to fetch a resource from an ACP POD
-"""
-def get_uma_token(solid_idp_token: str, resource_uri: str, access_request: dict | None = None):
-  # Call 1: get premission ticket from uma
-  (uma_uri, permission_ticket) = get_permission_ticket(resource_uri)
-
-  # Call 2: get uma configuration
-  uma_configuration = get_uma_configuration(uma_uri)
-  uma_token_endpoint = uma_configuration['token_endpoint']
-
-  # If no access grant given: find needed access grant
-  if access_request is None:
-    vc_configuration = get_vc_configuration(uma_configuration['verifiable_credential_issuer'])
-    access_request = find_access_request(solid_idp_token, resource_uri, vc_configuration['derivationService'])
-
-  # Call 3: get uma token without scopes
-  uma_unscoped_token = __request_uma_unscoped_token(access_request, uma_token_endpoint, permission_ticket) 
-
-  # Call 4: get uma token with scopes
-  return __request_uma_scoped_token(uma_token_endpoint, permission_ticket, solid_idp_token, uma_unscoped_token)
-
-def find_access_request(solid_idp_token: str, resource_uri: str,  vc_derive_endpoint: str) -> dict:
-  filtered_access_requests = [r for r in get_all_access_grants(vc_derive_endpoint, solid_idp_token) if __is_access_request_for_resource(resource_uri, r)]
-  if not len(filtered_access_requests):
-    audit_log(f"Could not find access request for resource {resource_uri}", LogLevel.ERROR)
-    return None
-  
-  return filtered_access_requests[0]
-
 def __is_access_request_for_resource(resource_uri: str, access_request: dict) -> bool:
 
   # TODO: make edge case better
@@ -165,8 +144,6 @@ def __is_access_request_for_resource(resource_uri: str, access_request: dict) ->
 
   # Grant can be used if the request gave access to the resource, or to a superfolder with inherit=true
   return resource_in_request == resource_uri or (inherit and resource_uri.startswith(resource_in_request))
-
-
 
 def __request_uma_unscoped_token(access_grant_body: dict, uma_token_endpoint:str, permission_ticket: str) -> str:
   verifiable_presentation = {
@@ -198,7 +175,6 @@ def __request_uma_unscoped_token(access_grant_body: dict, uma_token_endpoint:str
 
   return res_json['access_token']
 
-# As suggested by Athumi
 def __request_uma_scoped_token(uma_token_endpoint: str, permission_ticket: str, solid_idp_token: str, unscoped_token: str) -> str:
   payload = {
     'ticket': permission_ticket,
@@ -222,3 +198,29 @@ def __request_uma_scoped_token(uma_token_endpoint: str, permission_ticket: str, 
 
   return res_json['access_token']
 
+"""
+Fetches access request for specific resource. Will only result in an access request for this exact resource, not a parent resource with inherit=True
+"""
+def get_access_grant_for_resource(vc_derive_endpoint: str, solid_id_token: str, resource_uri: str) -> list[dict]:
+  body = {
+    'verifiableCredential': {
+      'credentialSubject': {
+      'providedConsent': {
+        'forPersonalData': resource_uri
+      }
+    }
+    }
+  }
+
+  headers = {
+    'Authorization': f"Bearer {solid_id_token}",
+    'Content-Type': 'application/json'
+  }
+
+  res = requests.post(vc_derive_endpoint, json=body, headers=headers)
+
+  if not res.ok:
+    audit_log(f"Could not search grants at VC. Got [{res.status_code}]: {res.text}")
+    return []
+  
+  return res.json()['verifiableCredential']
