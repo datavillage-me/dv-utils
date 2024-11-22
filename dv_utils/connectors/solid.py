@@ -11,7 +11,7 @@ class SolidConfiguration(Configuration):
   description = None
   path = None
   pod_url = None
-  verify_grants = None
+  verify_grants = False
 
 class SolidConnector():
   config: SolidConfiguration
