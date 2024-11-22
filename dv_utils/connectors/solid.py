@@ -11,6 +11,7 @@ class SolidConfiguration(Configuration):
   description = None
   path = None
   pod_url = None
+  verify_grants = None
 
 class SolidConnector():
   config: SolidConfiguration
@@ -19,4 +20,4 @@ class SolidConnector():
     self.config = copy.copy(config)
 
   def get(self) -> str:
-    return solid_utils.get_acp_from_pod_url(self.config.pod_url, self.config.path)
+    return solid_utils.get_acp_from_pod_url(self.config.pod_url, self.config.path, verify_grant=self.config.verify_grants)
