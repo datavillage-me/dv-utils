@@ -1,0 +1,18 @@
+{
+  "schema": {
+    "description": {
+      "description": "Description of the file in the Solid POD"
+    },
+    "path": {
+      "description": "Path to the file from the root folder",
+      "required": true
+    },
+    "podUrl": {
+      "description": "URL of the POD of the user"
+    },
+    "verifyGrants": {
+      "description": "Call the /verify endpoint of VC before using a grant. Only needed when use case requires revocation of access grants. Results in slower execution time",
+      "default": false
+    }
+  }
+}
