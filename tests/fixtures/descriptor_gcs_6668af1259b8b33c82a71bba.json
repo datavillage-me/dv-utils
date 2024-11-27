@@ -27,14 +27,13 @@
          }
        },
        "quality":[
-        {
-           "type":"sql",
-           "query":"SELECT COUNT(*) as row_count FROM {model}",
-           "mustBeGreaterThan": 1000
-        }
-     ]
+          {
+            "type":"sql",
+            "query":"SELECT COUNT(*) as row_count FROM {model}",
+            "mustBeGreaterThan": 1000
+          }
+      ]
      }
-    
    },
   "syntheticData":[
      {

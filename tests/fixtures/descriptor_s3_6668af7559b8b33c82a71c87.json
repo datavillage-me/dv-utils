@@ -1,33 +1,40 @@
 {
-  "name": "Mule accounts",
-  "description": "List of mule accounts",
-  "schema": {
-    "muleaccounts": {
-      "type": "table",
-      "fields": {
-        "account_id": {
-          "type": "varchar",
-          "required": true,
-          "pii": true,
-          "classification": "sensitive"
-        },
-        "account_holder_name": {
-          "type": "varchar",
-          "required": true,
-          "pii": true,
-          "classification": "sensitive"
-        },
-        "risk_score": {
-          "type": "integer",
-          "required": true
-        },
-        "red_flag": {
-          "type": "varchar",
-          "required": true
-        }
-      }
-    }
-  },
+  "name":"Mule accounts",
+  "description":"List of mule accounts",
+  "schema":{
+     "muleaccounts": {
+       "type": "table",
+       "fields": {
+         "account_id": {
+           "type": "varchar",
+           "required": true,
+           "pii": true,
+           "classification": "sensitive"
+         },
+         "account_holder_name": {
+           "type": "varchar",
+           "required": true,
+           "pii": true,
+           "classification": "sensitive"
+         },
+         "risk_score": {
+           "type": "integer",
+           "required": true
+         },
+         "red_flag": {
+           "type": "varchar",
+           "required": true
+         }
+       },
+       "quality":[
+          {
+            "type":"sql",
+            "query":"SELECT COUNT(*) as row_count FROM {model}",
+            "mustBeGreaterThan": 1000
+          }
+      ]
+     }
+   },
   "syntheticData": [
     {
       "type": "csv",

@@ -1,7 +1,7 @@
 {
   "connectorKeys":{
     "description":"One file per model. One file per day",
-    "location":"az://{model}.blob.core.windows.net/accounts/mule-accounts1-encrypted.parquet",
+    "location":"az://muleaccounts.blob.core.windows.net/muleaccounts/mule-accounts1-encrypted.parquet",
     "file_format":"parquet",
     "encryption_key":"${ENCRYPTION_KEY_6668af5c59b8b33c82a71c72}",
     "connection_key":"${CONNECTION_KEY_6668af5c59b8b33c82a71c72}",
