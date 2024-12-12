@@ -53,7 +53,7 @@ class PriorityListener:
       evt_type =evt.get("type", "MISSING_TYPE")
       set_event(evt, stream_name)
       if(log_events):
-        audit_log("Event processing started", evt=evt_type, state="STARTED", app="algo")
+        audit_log("Event processing started", state="STARTED", app="algo")
 
       try:
         self.event_processor(evt)
