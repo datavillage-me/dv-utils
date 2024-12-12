@@ -5,6 +5,7 @@ import time
 import httpx
 import sys
 from enum import Enum
+from importlib.metadata import version
 
 from .settings import settings as default_settings
 
@@ -23,6 +24,7 @@ class LogMetadata:
         self.evt_received = None
         self.evt_stream = None
         self.app_id = default_settings.config("DV_APP_ID", None)
+        self.lib_version = version('dv-utils')
 
     def set_event(self, evt: dict, evt_stream: str, evt_received_ns: int | None = None):
         self.evt = evt
