@@ -6,7 +6,7 @@ from typing import Any, Callable
 
 from ..process import process_event_dummy
 from ..redis import RedisQueue
-from ..log_utils import audit_log
+from ..log_utils import audit_log, set_event
 import time
 
 class PriorityListener:
@@ -30,9 +30,9 @@ class PriorityListener:
            audit_log(log="Algo Event Listener started", app="algo")
 
         while True:
-          evt = self.__listen_once()
+          evt, stream_name = self.__listen_once()
           if evt:
-            self.__handle_event(evt, log_events)
+            self.__handle_event(evt, log_events, stream_name)
           if not daemon:
           #stop after one event
             break
@@ -40,19 +40,20 @@ class PriorityListener:
         if(daemon):
            audit_log(log="Algo Event Listener Ended", app="algo")
 
-    def __listen_once(self):
+    def __listen_once(self) -> tuple[str,str]:
       for stream_name in self.stream_priorities:
         evt = self.redis_queue.listen_once(stream_name=stream_name, timeout=1)
         if evt:
-          return evt
+          return (evt, stream_name)
       
-      return None
+      return (None, None)
     
-    def __handle_event(self, evt, log_events):
+    def __handle_event(self, evt, log_events, stream_name):
       start = time.time()
       evt_type =evt.get("type", "MISSING_TYPE")
+      set_event(evt, stream_name)
       if(log_events):
-        audit_log("Event processing started", evt=evt_type, state="STARTED", app="algo")
+        audit_log("Event processing started", state="STARTED", app="algo")
 
       try:
         self.event_processor(evt)
