@@ -65,7 +65,7 @@ def create_body(log: str, level: LogLevel, **kwargs):
 def audit_log(log:str, level:LogLevel = LogLevel.INFO, **kwargs):
     if log is None:
         return
-    data = create_body(log, level, kwargs)
+    data = create_body(log, level, **kwargs)
     print(data, file=sys.stderr)
 
 
