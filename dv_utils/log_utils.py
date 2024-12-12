@@ -18,11 +18,10 @@ class LogLevel(Enum):
 # Holds metadata about the current event that is added to every log statement
 # Do not create an object of this class in code
 class LogMetadata:
-    evt = None
-    evt_received = None
-    app_id = None
-    evt_stream = None
     def __init__(self):
+        self.evt = None
+        self.evt_received = None
+        self.evt_stream = None
         self.app_id = default_settings.config("DV_APP_ID", None)
 
     def set_event(self, evt: dict, evt_stream: str, evt_received_ns: int | None = None):
@@ -34,7 +33,7 @@ class LogMetadata:
         for key in self.__dict__:
             yield key, getattr(self, key)
 
-_metadata = LogMetadata
+_metadata = LogMetadata()
 
 def get_loki_url() -> str:
     return default_settings.config("DV_LOKI", "http://loki.datavillage.svc.cluster.local:3100")
@@ -46,8 +45,8 @@ def get_app_namespace() -> str | None:
     else:
         return f'app-{cage_id}'
 
-def set_event(evt: dict, evt_received_ns: int | None = None):
-    _metadata.set_event(evt, evt_received_ns)
+def set_event(evt: dict, stream: str = "events", evt_received_ns: int | None = None):
+    _metadata.set_event(evt, stream, evt_received_ns)
 
 def create_body(log: str, level: LogLevel, **kwargs):
     log_dict = dict()
