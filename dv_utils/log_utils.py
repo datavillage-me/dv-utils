@@ -2,10 +2,10 @@
 This module defines utility functions for interaction with the loki server
 """
 import time
+from warnings import deprecated
 import httpx
 import sys
 from enum import Enum
-from datetime import datetime
 
 from .settings import settings as default_settings
 
@@ -51,6 +51,7 @@ def audit_log(log:str, level:LogLevel = LogLevel.INFO, **kwargs):
     data = create_body(log, level, kwargs)
     print(data, file=sys.stderr)
 
+@deprecated
 async def audit_log_async(log:str|dict|None=None, level: LogLevel = LogLevel.INFO):
     loki_url = get_loki_url()
     if (loki_url == 'STDOUT' or loki_url == 'STDERR'):
