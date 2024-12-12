@@ -10,7 +10,6 @@ import os
 
 from .settings import settings as default_settings
 
-logger = logging.getLogger(__name__)
 
 
 class RedisQueue:

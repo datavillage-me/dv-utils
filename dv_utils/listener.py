@@ -6,7 +6,7 @@ from typing import Any, Callable
 
 from .process import process_event_dummy
 from .redis import RedisQueue
-from .log_utils import audit_log
+from .log_utils import audit_log, set_event
 import time
 
 class DefaultListener:
@@ -31,6 +31,7 @@ class DefaultListener:
                evt_type =evt.get("type", "MISSING_TYPE")
                if(log_events):
                   audit_log("Event processing started", evt=evt_type, state="STARTED", app="algo")
+               set_event(evt)
 
                try:
                   event_processor(evt)

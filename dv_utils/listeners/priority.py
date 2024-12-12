@@ -6,7 +6,7 @@ from typing import Any, Callable
 
 from ..process import process_event_dummy
 from ..redis import RedisQueue
-from ..log_utils import audit_log
+from ..log_utils import audit_log, set_event
 import time
 
 class PriorityListener:
@@ -51,6 +51,7 @@ class PriorityListener:
     def __handle_event(self, evt, log_events):
       start = time.time()
       evt_type =evt.get("type", "MISSING_TYPE")
+      set_event(evt)
       if(log_events):
         audit_log("Event processing started", evt=evt_type, state="STARTED", app="algo")
 

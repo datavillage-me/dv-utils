@@ -2,7 +2,6 @@
 This module defines utility functions for interaction with the loki server
 """
 import time
-from warnings import deprecated
 import httpx
 import sys
 from enum import Enum
@@ -52,6 +51,7 @@ def set_event(evt: dict, evt_received_ns: int | None = None):
 
 def create_body(log: str, level: LogLevel, **kwargs):
     log_dict = dict()
+    # First add kwargs so that the hardcoded keys don't get overwritten
     for k, v in kwargs.items():
         log_dict[k] = str(v)
 
@@ -62,13 +62,16 @@ def create_body(log: str, level: LogLevel, **kwargs):
 
     return log_dict
 
+# TODO: should we also add an optional parameter `start_ns` to automatically add `duration_ns` (or whatever) field?
 def audit_log(log:str, level:LogLevel = LogLevel.INFO, **kwargs):
     if log is None:
         return
     data = create_body(log, level, kwargs)
     print(data, file=sys.stderr)
 
-@deprecated
+
+
+# TODO: deprecate or delete
 async def audit_log_async(log:str|dict|None=None, level: LogLevel = LogLevel.INFO):
     loki_url = get_loki_url()
     if (loki_url == 'STDOUT' or loki_url == 'STDERR'):
