@@ -34,43 +34,22 @@ def get_app_namespace() -> str | None:
     else:
         return f'app-{cage_id}'
 
-def create_body(log: str | dict | None, level: LogLevel):
-    log_dict = {'log': log} if type(log) == str else log 
+def create_body(log: str, level: LogLevel, **kwargs):
+    log_dict = dict()
+    for k, v in kwargs.items():
+        log_dict[k] = str(v)
+
+    log_dict = {'msg': log}
     log_dict.update({'level': level.name})
+    log_dict.update({'timestamp': time.time_ns()})
 
-    return {"streams": [{ "stream": { "app": "algo" }, "values": [ [ str(time.time_ns()), str(log_dict) ] ] }]} 
+    return log_dict
 
-def audit_log(log:str|dict|None=None, level:LogLevel = LogLevel.INFO, **kwargs):
-    loki_url = get_loki_url()
-    if loki_url.upper() == 'STDOUT':
-        time_string = datetime.now().strftime('%F %T,%f')[:-3]
-        print(__get_color_for_log_level(level)+time_string+" - "+level.name+" - "+str(log))
-        print(bcolors.DEFAULT)
-    elif loki_url.upper() == 'STDERR':
-        print(log, file=sys.stderr)
-    else:
-        data = create_body(log, level)
-        __push_loki(loki_url, data)
-       
-def __get_color_for_log_level(level):
-    if level==LogLevel.TRACE:
-        return bcolors.TRACE
-    elif level==LogLevel.DEBUG:
-        return bcolors.DEBUG
-    elif level==LogLevel.INFO:
-        return bcolors.INFO
-    elif level==LogLevel.WARN:
-        return bcolors.WARN
-    elif level==LogLevel.ERROR:
-        return bcolors.ERROR
-    else:
-        return bcolors.DEFAULT
-def __push_loki(url: str, data: dict):
-    app_namespace = get_app_namespace()
-
-    r = httpx.post(url=f'{url}/loki/api/v1/push', json=data, headers={"X-Scope-OrgID": app_namespace, "Content-Type": "application/json"})
-    if(r.status_code!=204):
-        print(f"Error pushing log {r}", flush=True) 
+def audit_log(log:str, level:LogLevel = LogLevel.INFO, **kwargs):
+    if log is None:
+        return
+    data = create_body(log, level, kwargs)
+    print(data, file=sys.stderr)
 
 async def audit_log_async(log:str|dict|None=None, level: LogLevel = LogLevel.INFO):
     loki_url = get_loki_url()
