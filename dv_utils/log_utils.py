@@ -5,17 +5,9 @@ import time
 import httpx
 import sys
 from enum import Enum
-from datetime import datetime
+from importlib.metadata import version
 
 from .settings import settings as default_settings
-
-class bcolors:
-    DEFAULT = '\033[97m'
-    TRACE = '\033[97m'
-    DEBUG = '\033[97m'
-    INFO = '\033[94m'
-    WARN = '\033[93m'
-    ERROR = '\033[91m'
 
 class LogLevel(Enum):
     TRACE = 0
@@ -23,6 +15,27 @@ class LogLevel(Enum):
     INFO = 20
     WARN = 30
     ERROR = 40
+
+# Holds metadata about the current event that is added to every log statement
+# Do not create an object of this class in code
+class LogMetadata:
+    def __init__(self):
+        self.evt = None
+        self.evt_received = None
+        self.evt_stream = None
+        self.app_id = default_settings.config("DV_APP_ID", None)
+        self.lib_version = version('dv-utils')
+
+    def set_event(self, evt: dict, evt_stream: str, evt_received_ns: int | None = None):
+        self.evt = evt
+        self.evt_stream = evt_stream
+        self.evt_received = evt_received_ns if evt_received_ns is not None else time.time_ns()
+
+    def __iter__(self):
+        for key in self.__dict__:
+            yield key, getattr(self, key)
+
+_metadata = LogMetadata()
 
 def get_loki_url() -> str:
     return default_settings.config("DV_LOKI", "http://loki.datavillage.svc.cluster.local:3100")
@@ -34,44 +47,32 @@ def get_app_namespace() -> str | None:
     else:
         return f'app-{cage_id}'
 
-def create_body(log: str | dict | None, level: LogLevel):
-    log_dict = {'log': log} if type(log) == str else log 
+def set_event(evt: dict, stream: str = "events", evt_received_ns: int | None = None):
+    _metadata.set_event(evt, stream, evt_received_ns)
+
+def create_body(log: str, level: LogLevel, **kwargs):
+    log_dict = dict()
+    # First add kwargs so that the hardcoded keys don't get overwritten
+    for k, v in kwargs.items():
+        log_dict[k] = str(v)
+
+    log_dict = {'msg': log}
+    log_dict.update(dict(_metadata))
     log_dict.update({'level': level.name})
+    log_dict.update({'timestamp': time.time_ns()})
 
-    return {"streams": [{ "stream": { "app": "algo" }, "values": [ [ str(time.time_ns()), str(log_dict) ] ] }]} 
+    return log_dict
 
-def audit_log(log:str|dict|None=None, level:LogLevel = LogLevel.INFO, **kwargs):
-    loki_url = get_loki_url()
-    if loki_url.upper() == 'STDOUT':
-        time_string = datetime.now().strftime('%F %T,%f')[:-3]
-        print(__get_color_for_log_level(level)+time_string+" - "+level.name+" - "+str(log))
-        print(bcolors.DEFAULT)
-    elif loki_url.upper() == 'STDERR':
-        print(log, file=sys.stderr)
-    else:
-        data = create_body(log, level)
-        __push_loki(loki_url, data)
-       
-def __get_color_for_log_level(level):
-    if level==LogLevel.TRACE:
-        return bcolors.TRACE
-    elif level==LogLevel.DEBUG:
-        return bcolors.DEBUG
-    elif level==LogLevel.INFO:
-        return bcolors.INFO
-    elif level==LogLevel.WARN:
-        return bcolors.WARN
-    elif level==LogLevel.ERROR:
-        return bcolors.ERROR
-    else:
-        return bcolors.DEFAULT
-def __push_loki(url: str, data: dict):
-    app_namespace = get_app_namespace()
+# TODO: should we also add an optional parameter `start_ns` to automatically add `duration_ns` (or whatever) field?
+def audit_log(log:str, level:LogLevel = LogLevel.INFO, **kwargs):
+    if log is None:
+        return
+    data = create_body(log, level, **kwargs)
+    print(data, file=sys.stderr)
 
-    r = httpx.post(url=f'{url}/loki/api/v1/push', json=data, headers={"X-Scope-OrgID": app_namespace, "Content-Type": "application/json"})
-    if(r.status_code!=204):
-        print(f"Error pushing log {r}", flush=True) 
 
+
+# TODO: deprecate or delete
 async def audit_log_async(log:str|dict|None=None, level: LogLevel = LogLevel.INFO):
     loki_url = get_loki_url()
     if (loki_url == 'STDOUT' or loki_url == 'STDERR'):

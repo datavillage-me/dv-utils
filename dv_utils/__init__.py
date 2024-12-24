@@ -8,4 +8,4 @@ from .process import process_event_dummy
 from .redis import RedisQueue
 from .settings import Settings
 from .settings import settings as default_settings
-from .log_utils import audit_log, audit_log_async, LogLevel
+from .log_utils import audit_log, audit_log_async, set_event, LogLevel

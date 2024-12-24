@@ -6,7 +6,7 @@ from typing import Any, Callable
 
 from .process import process_event_dummy
 from .redis import RedisQueue
-from .log_utils import audit_log
+from .log_utils import audit_log, set_event
 import time
 
 class DefaultListener:
@@ -29,14 +29,15 @@ class DefaultListener:
            if evt:
                start = time.time()
                evt_type =evt.get("type", "MISSING_TYPE")
+               set_event(evt)
                if(log_events):
-                  audit_log("Event processing started", evt=evt_type, state="STARTED", app="algo")
+                  audit_log("Event processing started", state="STARTED", app="algo")
 
                try:
                   event_processor(evt)
                except Exception as err:
                   if(log_events):
-                     audit_log("Event processing failed", evt=evt_type, state="FAILED", app="algo", error=str(err), processing_time=time.time()-start)
+                     audit_log("Event processing failed",  state="FAILED", app="algo", error=str(err), processing_time=time.time()-start)
                else:
                   if(log_events):
                      audit_log("Event processing done", evt=evt_type, state="DONE", app="algo", processing_time=time.time()-start)
