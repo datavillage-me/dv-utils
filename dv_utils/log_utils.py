@@ -2,6 +2,7 @@
 This module defines utility functions for interaction with the loki server
 """
 import time
+import datetime
 import httpx
 import sys
 from enum import Enum
@@ -15,6 +16,7 @@ class LogLevel(Enum):
     INFO = 20
     WARN = 30
     ERROR = 40
+    AUDIT = 50
 
 # Holds metadata about the current event that is added to every log statement
 # Do not create an object of this class in code
@@ -64,11 +66,15 @@ def create_body(log: str, level: LogLevel, **kwargs):
     return log_dict
 
 # TODO: should we also add an optional parameter `start_ns` to automatically add `duration_ns` (or whatever) field?
-def audit_log(log:str, level:LogLevel = LogLevel.INFO, **kwargs):
+def audit_log(log:str, level:LogLevel = LogLevel.AUDIT, **kwargs):
     if log is None:
         return
+    #add timestamp in the log
     data = create_body(log, level, **kwargs)
-    print(data, file=sys.stderr)
+    now = datetime.datetime.now()
+    formated_now = now.strftime('%Y-%m-%d %H:%M:%S.%f')
+    header=formated_now[:-3] + " - AUDIT - "
+    print(header+str(data), file=sys.stderr)
 
 
 

@@ -41,6 +41,8 @@ class Settings:
         self.redis_host = config("REDIS_SERVICE_HOST", default="localhost", cast=str)
         self.redis_port = config("REDIS_SERVICE_PORT", default="6379", cast=str)
 
+        self.secret_manager_url = config("SECRET_MANAGER_URL", default="http://secret-manager", cast=str)
+
         self.data_connector_config_location = config("DATA_CONNECTOR_CONFIG_LOCATION", default="/resources/data", cast=str)
 
         self.data_user_output_location = config("DATA_USER_OUTPUT_LOCATION", default="/resources/outputs", cast=str)

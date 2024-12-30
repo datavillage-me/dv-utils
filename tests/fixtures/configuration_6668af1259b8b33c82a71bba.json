@@ -1,7 +1,7 @@
 {
   "connectorKeys":{
     "description":"One file per model. One file per day",
-    "location":"gs://{model}/mule-accounts0-encrypted.parquet",
+    "location":"gs://bank_a/{model}.parquet",
     "file_format":"parquet",
     "encryption_key":"${ENCRYPTION_KEY_6668af1259b8b33c82a71bba}",
     "key_id":"${KEY_ID_6668af1259b8b33c82a71bba}",

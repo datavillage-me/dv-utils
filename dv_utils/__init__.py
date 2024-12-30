@@ -2,6 +2,7 @@
 Datavillage python utils for building algorithm running in confidential collaboration space
 """
 from .client import Client
+from .secret_manager import SecretManager
 from .datasets.contract_manager import ContractManager
 from .listener import DefaultListener
 from .process import process_event_dummy
