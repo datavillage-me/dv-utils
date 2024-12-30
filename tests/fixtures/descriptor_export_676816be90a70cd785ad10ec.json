@@ -1,0 +1,10 @@
+{
+    "name": "Mule accounts",
+    "description": "Mule accounts",
+    "schema": "{\n    \"quality_checks\": {\n        \"type\": \"table\",\n        \"fields\": {\n            \"description\": {\n                \"type\": \"varchar\",\n                \"required\": true\n            },\n            \"hasErrors\": {\n                \"type\": \"boolean\",\n                \"required\": true\n            },\n            \"hasWarnings\": {\n                \"type\": \"boolean\",\n                \"required\": true\n            },\n            \"hasFailures\": {\n                \"type\": \"boolean\",\n                \"required\": true\n            },\n            \"details\": {\n                \"type\": \"text\",\n                \"required\": true\n            }\n        }\n    }\n}",
+    "settings": {
+        "connector": "File"
+    },
+    "kind": "Custom",
+    "id": "676816be90a70cd785ad10ec"
+}

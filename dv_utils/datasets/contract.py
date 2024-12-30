@@ -69,22 +69,27 @@ class Contract:
                     else:
                         logger.error(f"{self.connector.format} not supported for data contract check. Only parquet, json or csv are supported") 
                         raise Exception("Unable to check data contract")
-                    #Start quality check with soda
-                    logger.debug(f"Running engine soda-core")
-                    logger.debug(f"Export data contract to soda checks")
-                    sodacl_contract=self.data_contract.export("sodacl")
+                #Start quality check with soda
+                logger.debug(f"Running engine soda-core")
+                logger.debug(f"Export data contract to soda checks")
+                sodacl_contract=self.data_contract.export("sodacl")
+                sodacl_contract_yaml=yaml.safe_load(sodacl_contract)
+                scan_results={}
+                for soda_check in sodacl_contract_yaml:
+                    soda_check_yaml=sodacl_contract_yaml.get(soda_check, [])
+                    logging.debug("Starting soda scan for model - "+soda_check)
                     scan = Scan()
                     scan.add_duckdb_connection(duckdb_connection=con, data_source_name=self.connector.config.connector_id)
                     scan.set_data_source_name(self.connector.config.connector_id)
-                    scan.add_sodacl_yaml_str(sodacl_contract)
-                    logging.debug("Starting soda scan")
+                    #add sodaCL checks per model - small trick is to add the soda_check string with carriage return to make the yaml str comply with soda check format
+                    scan.add_sodacl_yaml_str(soda_check+":\n"+yaml.dump(soda_check_yaml))
                     scan.execute()
                     #This is a bug in soda. I need to "flush" the logs to avoid keeping logs error items in log history
                     scan._logs=None
                     logging.debug("Finished soda scan")
                     #get results
-                    scan_results = scan.get_scan_results()
-                    if(scan_results['hasErrors'] or scan_results['hasFailures']):
+                    scan_result = scan.get_scan_results()
+                    if(scan_result['hasErrors'] or scan_result['hasFailures']):
                         string_to_log=f'Quality check done data descriptor {self.data_descriptor_id}. Scan result NOK'
                         audit_log(string_to_log,LogLevel.WARN)
                         logging.error(string_to_log)
@@ -92,14 +97,31 @@ class Contract:
                         string_to_log=f'Quality check done data descriptor {self.data_descriptor_id}. Scan result OK'
                         audit_log(string_to_log)
                         logging.debug(string_to_log)
-                    #return results to the caller for further user (show to end user, ...)
-                    return scan_results
-                else:
-                    logger.error(f"No connector defined in the data contract or missing argument (location or format)") 
-                    raise Exception("Unable to check data contract")
+                    scan_results[soda_check]=scan_result
+                #return results in json to the caller for further user (show to end user, ...)
+                return scan_results
+            else:
+                logger.error(f"No connector defined in the data contract or missing argument (location or format)") 
+                raise Exception("Unable to check data contract")
         except Exception as inst:
             logger.error(f"Unable to check data contract {inst}")
             raise
+
+    def export_contract_to_sql_create_table(self,model_key:str): 
+        logger.debug(f"Get all fields from data contract model - "+model_key)
+        spec_yaml = yaml.safe_load(self.data_contract.get_data_contract_specification().to_yaml())
+        fields=spec_yaml["models"][model_key]["fields"]
+        logger.debug(f"Create SQL query for model - "+model_key)
+        if len(fields)<=0:
+            logger.error(f"Unable to initialise export contract to sql create table: No fields in the data contract")
+            raise 
+        query="CREATE OR REPLACE TABLE "+model_key+ "("
+        for field_name in fields:
+            field_type=spec_yaml["models"][model_key]["fields"][field_name]["type"]
+            query=query+str(field_name)+" "+field_type.upper()+","
+        query=query[:-1]+")"
+        print(query)
+        return query
 
     def __init_data_connector(self,data_source_type: str):
         try:

@@ -30,10 +30,10 @@ class ContractManager:
         else:
             logger.error(f"Not able to create contract, data descriptor available: data_descriptor_id:{data_descriptor_id}")
 
-    def get_contracts_for_collaboration_space(self, collaboration_space_id: str):
+    def get_contracts_for_collaboration_space(self, collaboration_space_id: str,participants_role:str=Client.DATA_PROVIDER_COLLABORATOR_ROLE_VALUE):
         data_contracts=[]
         logger.debug(f"Get list of data providers for:{collaboration_space_id}")
-        list_participants=self.client.get_list_of_participants(collaboration_space_id,self.client.DATA_PROVIDER_COLLABORATOR_ROLE_VALUE)
+        list_participants=self.client.get_list_of_participants(collaboration_space_id,participants_role)
         if list_participants != None and len(list_participants)>0:
             for participant in list_participants:
                 client_id=participant["clientId"]
@@ -46,8 +46,7 @@ class ContractManager:
             return data_contracts
         else:
             logger.error(f"No participant as data provider available for collaboration_space_id: {collaboration_space_id}")
-            return None
-    
+            return None 
 
     def check_contract_for_data_descriptor(self, data_descriptor_id: str, data_descriptor:str):
         audit_log(f"Check data contract for data_descriptor: {data_descriptor['id']}")
@@ -68,6 +67,5 @@ class ContractManager:
             audit_log(f"Error verifying data contracts for collaboration space {collaboration_space_id}. No data contract available.",LogLevel.ERROR)
             raise Exception(f"Unable to check data contracts for collaboration space {collaboration_space_id}")
         return scan_results
-
-
+    
     

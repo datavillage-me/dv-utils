@@ -24,6 +24,22 @@ class Client:
 
     def __init__(self, settings: Settings = None):
         self.settings: Settings = settings or default_settings
+    
+    def get_public_key_url(self, collaboration_space_id: str):
+        return f"{self.settings.base_url}/collaborationSpaces/{collaboration_space_id}/publicKey"
+    
+    def get_public_key(self, collaboration_space_id: str):
+        """
+        Returns the collaboration space public key
+        """
+        try:
+            public_key = self.request(
+                f"/collaborationSpaces/{collaboration_space_id}/publicKey"
+            )
+            return public_key
+        except Exception as e:
+            logger.error(e)
+            return None
 
     def get_list_of_participants(self, collaboration_space_id: str, role: str):
         """
@@ -34,9 +50,9 @@ class Client:
                 f"/collaborationSpaces/{collaboration_space_id}/collaborators"
             )
             if role!=None:
-                filtered_participants = [x for x in list_participants if role == None or role == x["role"]]
+                filtered_participants = [x for x in list_participants if role == None or role == x["role"] and x["invite"]["status"]=="Accepted"]
             else:
-                filtered_participants=list_participants
+                filtered_participants=[x for x in list_participants if x["invite"]["status"]=="Accepted"]
             return filtered_participants
         except Exception as e:
             logger.error(e)
@@ -69,6 +85,8 @@ class Client:
             # Currently no other format than turtle is supported
             raise Exception(f"Unknown format {format}")
 
+
+    # TODO: deprecate or delete - attention backward compatibility in collaboration spaces using this feature
     def write_results(self, user_id: str, filename: str, content: str):
         """
         Writes the results into the pod.

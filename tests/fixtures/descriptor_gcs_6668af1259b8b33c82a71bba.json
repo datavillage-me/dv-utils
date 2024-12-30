@@ -2,38 +2,78 @@
   "name":"Mule accounts",
   "description":"List of mule accounts",
   "schema":{
-     "muleaccounts": {
-       "type": "table",
-       "fields": {
-         "account_id": {
-           "type": "varchar",
-           "required": true,
-           "pii": true,
-           "classification": "sensitive"
-         },
-         "account_holder_name": {
-           "type": "varchar",
-           "required": true,
-           "pii": true,
-           "classification": "sensitive"
-         },
-         "risk_score": {
-           "type": "integer",
-           "required": true
-         },
-         "red_flag": {
-           "type": "varchar",
-           "required": true
-         }
-       },
-       "quality":[
-          {
-            "type":"sql",
-            "query":"SELECT COUNT(*) as row_count FROM {model}",
-            "mustBeGreaterThan": 1000
+    "suspicious_accounts": {
+      "type": "table",
+      "fields": {
+          "account_uuid": {
+              "type": "varchar",
+              "required": true,
+              "pii": true,
+              "classification": "sensitive"
+          },
+          "account_number": {
+              "type": "varchar",
+              "required": true,
+              "pii": true,
+              "classification": "sensitive"
+          },
+          "account_format": {
+              "type": "varchar",
+              "required": true
+          },
+          "bank_id": {
+              "type": "varchar",
+              "required": true,
+              "pii": true,
+              "classification": "sensitive"
+          },
+          "reporter_bic": {
+              "type": "varchar",
+              "required": true,
+              "pii": true,
+              "classification": "sensitive"
+          },
+          "date_added": {
+              "type": "date",
+              "required": true
           }
-      ]
-     }
+      }
+  },
+  "mule_accounts": {
+      "type": "table",
+      "fields": {
+          "account_uuid": {
+              "type": "varchar",
+              "required": true,
+              "pii": true,
+              "classification": "sensitive"
+          },
+          "account_number": {
+              "type": "varchar",
+              "required": true,
+              "pii": true,
+              "classification": "sensitive"
+          },
+          "account_format": {
+              "type": "varchar",
+              "required": true
+          },
+          "bank_id": {
+              "type": "varchar",
+              "required": true,
+              "pii": true,
+              "classification": "sensitive"
+          },
+          "date_added": {
+              "type": "date",
+              "required": true
+          },
+          "critical_account": {
+              "type": "varchar",
+              "required": true
+          }
+      }
+  }
    },
   "syntheticData":[
      {
