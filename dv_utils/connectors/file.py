@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 import logging
 import requests
 import os
+import json
 import copy
 import cloudscraper
 from ..log_utils import audit_log, LogLevel
@@ -127,7 +128,7 @@ class FileConnector():
         #get data from model_key in memory db as json
         query=f"SELECT * FROM {model_key}"
         df=self.duckdb_connection.sql(query).df()
-        json_payload=df.to_json(orient = 'records')
+        json_payload=json.loads(df.to_json(orient = 'records'))
         #create signed json
         signed_json=self.SecretManager.sign_json(collaboration_space_id,json_payload)
         
