@@ -94,7 +94,7 @@ class S3Connector():
         #get data from model_key in memory db as json
         query=f"SELECT * FROM {model_key}"
         df=self.duckdb_connection.sql(query).df()
-        json_payload=json.loads(df.to_json(orient = 'records'))
+        json_payload=json.loads(df.to_json(orient = 'records',date_format='iso'))
         #create signed json
         signed_json=self.SecretManager.sign_json(collaboration_space_id,json_payload)
         
