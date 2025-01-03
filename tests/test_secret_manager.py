@@ -37,3 +37,15 @@ class Test(unittest.TestCase):
         content = {"test":"test"}
         signed_json=self.SecretManager.sign_json(collaboration_space_id,content)
         print(signed_json)
+    
+    def test_decrypt_file(self):
+        with open("tests/outputs/encrypted_file.txt", "rb") as file:
+            files = {'message': file}
+            decrypted_file=self.SecretManager.decrypt(files)
+            print(decrypted_file)
+
+    def test_decrypt_encoded_string(self):  
+        # The content of your string
+        content = "ewogICJwYXNzcGhyYXNlIjogIkpPQ0Zsbjh5V2dNS1Y2d0tQNUo5UDhVSEZwVDlkV1ZEbStqLzhKcm1rQkd3c1N3bkMxc1hDY0w1WnpZV2JaRW1hYTNTWklEZW0vWDhYbzZ3Q2t3cUtOaXF4VE9EalcwWTE4MThpTE11V0RFMDc2b2VseHowRVYyQmlscExoZjFkSWN6RDhCWEJ6U2IrS3VSZlZMSVo1NG5QSEpiTVBnNnJTSnRqSUNzN1ZjVllhQkFhSElicE1XbDlNaGV2Rm0veHc0V1U4UkNYMGZxYWZzVWFiUFJLRVUxWmlKc0U5a0hqMndDLzZtblZha21sY1pQQ0VUbnMwN1hQNURleHJxa3dEemZkZ25PTEU2eExmd1NwRzQ3YUFCVzJCOTVGZVdHNU8zQ0lKVXlCR2J5SE1sSFVJTGZXa2l0UFRJa1cxejhLaFIyaFFBa1dxanowaXlEZGlJQVhWUT09IiwKICAiY29udGVudCI6ICJVMkZzZEdWa1gxOEE4WWZjMEFZK0dLRDhBOXdGUlZRbndXalRzcldib2dEaktPdStlOXJHa1Y3eWY1SWxWWit6Igp9"
+        decrypted_string=self.SecretManager.decrypt_encoded_string(content)
+        print(decrypted_string)

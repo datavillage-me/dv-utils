@@ -54,6 +54,36 @@ class SecretManager:
             logger.error(e)
             return None
     
+    def decrypt(self, files):
+        """
+        decrypt the opened binary files with the private key linked to the confidential environment
+        the files needs to be structured like the following files = {'file': file} as in python request object
+        """
+        try:
+            decrypted_file = self.request(
+                path="/decrypt",
+                method="POST",
+                files=files
+
+            )
+            return decrypted_file
+        except Exception as e:
+            logger.error(e)
+            return None
+    
+    def decrypt_encoded_string(self, content:str):
+        """
+        decrypt the content string with the private key linked to the confidential environment
+        """
+        try:
+            #convert the string into binary
+            file_like_object = io.BytesIO(self.base64_decode_string(content).encode('utf-8'))
+            files={'message': ('message.txt', file_like_object)}
+            return self.decrypt(files)
+        except Exception as e:
+            logger.error(e)
+            return None
+    
     def sign_json(self, collaboration_space_id:str,json_payload:dict):
         """
         create signed json (json web signature https://datatracker.ietf.org/doc/html/rfc7515) based on json payload 
@@ -79,6 +109,26 @@ class SecretManager:
         content_bytes = content.encode('ascii')
         base64_bytes = base64.b64encode(content_bytes)
         return base64_bytes.decode('ascii')
+    
+    def base64_decode_string(self,content, as_text=True):
+      """
+      Decodes a Base64-encoded string.
+
+      Args:
+          content (str): The Base64-encoded string.
+          as_text (bool): Whether to decode to text (default is True).
+
+      Returns:
+          bytes or str: Decoded content.
+      """
+      try:
+          decoded_bytes = base64.b64decode(content.encode('utf-8'))
+          if as_text:
+              return decoded_bytes.decode('utf-8')
+          return decoded_bytes
+      except Exception as e:
+          logger.error(f"Base64 decoding failed: {e}")
+          raise
 
     def request(
         self,
