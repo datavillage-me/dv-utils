@@ -19,7 +19,7 @@ class DefaultListener:
     ):
         # Instantiate the local Datavillage Redis queue
         redis_queue = RedisQueue()
-        redis_queue.create_consummer_group()
+        redis_queue.create_consumer_group()
 
         if(daemon):
            audit_log(log="Algo Event Listener started", app="algo")

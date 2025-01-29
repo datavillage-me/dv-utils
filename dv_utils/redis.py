@@ -23,16 +23,16 @@ class RedisQueue:
         port=default_settings.redis_port,
         consumer_name=None,
     ):
-        self.consumer_group = "consummers"
+        self.consumer_group = "consumers"
         if consumer_name:
             self.consumer_name = consumer_name
         else:
             self.consumer_name = f"cage-{os.environ.get("DV_CAGE_ID")}"
         self.redis = redis.Redis(host, port, db=0)
 
-    def create_consummer_group(self, stream_names = ["events"]) -> None:
+    def create_consumer_group(self, stream_names = ["events"]) -> None:
         """
-        Create the consummer group if it does not exist
+        Create the consumer group if it does not exist
         """
         for s in stream_names:
             try:
@@ -43,9 +43,9 @@ class RedisQueue:
                 else:
                     raise error
 
-    def destroy_consummer_group(self) -> None:
+    def destroy_consumer_group(self) -> None:
         """
-        Remove the consummer group if it exists
+        Remove the consumer group if it exists
         """
         self.redis.xgroup_destroy("events", self.consumer_group)
 
@@ -55,7 +55,7 @@ class RedisQueue:
 
         Args:
             data (dict): event data to publish
-            create_consumer_group (bool, optional): create the consummer group if it does not exist. Defaults to True.
+            create_consumer_group (bool, optional): create the consumer group if it does not exist. Defaults to True.
             stream_name (str, default=events): the stream_name to publish the events to
 
         Returns:
@@ -63,7 +63,7 @@ class RedisQueue:
         """
 
         if create_consumer_group:
-            self.create_consummer_group()
+            self.create_consumer_group()
 
         msg_id = self.redis.xadd(
             stream_name,
@@ -86,7 +86,7 @@ class RedisQueue:
         """
         logging.debug("Waiting for message...")
         messages = self.redis.xreadgroup(
-            "consummers",
+            self.consumer_group,
             self.consumer_name,
             {stream_name: ">"},
             noack=True,

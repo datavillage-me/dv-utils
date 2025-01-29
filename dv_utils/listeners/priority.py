@@ -19,7 +19,7 @@ class PriorityListener:
     ):
         # Instantiate the local Datavillage Redis queue
         self.redis_queue = RedisQueue()
-        self.redis_queue.create_consummer_group(stream_priorities)
+        self.redis_queue.create_consumer_group(stream_priorities)
         self.event_processor = event_processor
         self.stream_priorities = stream_priorities
 
