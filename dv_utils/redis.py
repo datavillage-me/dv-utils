@@ -27,7 +27,8 @@ class RedisQueue:
         if consumer_name:
             self.consumer_name = consumer_name
         else:
-            self.consumer_name = f"cage-{os.environ.get("DV_CAGE_ID")}"
+            cage_id = os.environ.get("DV_CAGE_ID")
+            self.consumer_name = f"cage-{cage_id}"
         self.redis = redis.Redis(host, port, db=0)
 
     def create_consumer_group(self, stream_names = ["events"]) -> None:
