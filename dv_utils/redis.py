@@ -21,10 +21,13 @@ class RedisQueue:
         self,
         host=default_settings.redis_host,
         port=default_settings.redis_port,
-        consumer_name="consummer-0",
+        consumer_name=None,
     ):
         self.consumer_group = "consummers"
-        self.consumer_name = consumer_name
+        if consumer_name:
+            self.consumer_name = consumer_name
+        else:
+            self.consumer_name = f"cage-{os.environ.get("DV_CAGE_ID")}"
         self.redis = redis.Redis(host, port, db=0)
 
     def create_consummer_group(self, stream_names = ["events"]) -> None:
