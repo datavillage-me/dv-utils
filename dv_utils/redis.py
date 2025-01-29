@@ -25,7 +25,7 @@ class RedisQueue:
     ):
         self.consumer_group = "consummers"
         self.consumer_name = consumer_name
-        self.redis = redis.Redis(host, port, db=0, ssl=True, ssl_ca_certs=os.environ.get("TLS_CAFILE",None))
+        self.redis = redis.Redis(host, port, db=0)
 
     def create_consummer_group(self, stream_names = ["events"]) -> None:
         """
