@@ -71,10 +71,7 @@ def audit_log(log:str, level:LogLevel = LogLevel.AUDIT, **kwargs):
         return
     #add timestamp in the log
     data = create_body(log, level, **kwargs)
-    now = datetime.datetime.now()
-    formated_now = now.strftime('%Y-%m-%d %H:%M:%S.%f')
-    header=formated_now[:-3] + " - AUDIT - "
-    print(header+str(data), file=sys.stderr)
+    print(str(data), file=sys.stderr)
 
 
 
