@@ -2,6 +2,7 @@
 This module defines utility functions for interaction with the loki server
 """
 import time
+import json
 import datetime
 import httpx
 import sys
@@ -71,7 +72,8 @@ def audit_log(log:str, level:LogLevel = LogLevel.AUDIT, **kwargs):
         return
     #add timestamp in the log
     data = create_body(log, level, **kwargs)
-    print(str(data), file=sys.stderr)
+    json_encoded = json.dumps(data)
+    print(json_encoded, file=sys.stderr)
 
 
 
