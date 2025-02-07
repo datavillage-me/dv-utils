@@ -26,7 +26,7 @@ class LogMetadata:
         self.evt = None
         self.evt_received = None
         self.evt_stream = None
-        self.app_id = default_settings.config("DV_APP_ID", None)
+        self.cage_id = default_settings.config("DV_CAGE_ID", None)
         self.lib_version = version('dv-utils')
 
     def set_event(self, evt: str, evt_stream: str, evt_received_ns: int | None = None):
