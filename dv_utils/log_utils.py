@@ -29,7 +29,7 @@ class LogMetadata:
         self.app_id = default_settings.config("DV_APP_ID", None)
         self.lib_version = version('dv-utils')
 
-    def set_event(self, evt: dict, evt_stream: str, evt_received_ns: int | None = None):
+    def set_event(self, evt: str, evt_stream: str, evt_received_ns: int | None = None):
         self.evt = evt
         self.evt_stream = evt_stream
         self.evt_received = evt_received_ns if evt_received_ns is not None else time.time_ns()
@@ -51,7 +51,7 @@ def get_app_namespace() -> str | None:
         return f'app-{cage_id}'
 
 def set_event(evt: dict, stream: str = "events", evt_received_ns: int | None = None):
-    _metadata.set_event(evt, stream, evt_received_ns)
+    _metadata.set_event(evt['type'], stream, evt_received_ns)
 
 def create_body(log: str, level: LogLevel, **kwargs):
     log_dict = dict()
