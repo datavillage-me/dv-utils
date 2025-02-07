@@ -67,7 +67,7 @@ def create_body(log: str, level: LogLevel, **kwargs):
     return log_dict
 
 # TODO: should we also add an optional parameter `start_ns` to automatically add `duration_ns` (or whatever) field?
-def audit_log(log:str, level:LogLevel = LogLevel.AUDIT, **kwargs):
+def audit_log(log:str, level:LogLevel = LogLevel.INFO, **kwargs):
     if log is None:
         return
     #add timestamp in the log
