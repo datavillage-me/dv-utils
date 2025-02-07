@@ -7,7 +7,7 @@ import os
 import json
 import copy
 import cloudscraper
-from ..log_utils import audit_log, LogLevel
+from ..log_utils import log, LogLevel
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class FileConnector():
         file_names = self.config.file_name.split(',')
 
         if len(urls) != len(file_names):
-            audit_log(f'Length of urls and file list should be the same. Got {len(urls)} and {len(file_names)}', level=LogLevel.ERROR)
+            log(f'Length of urls and file list should be the same. Got {len(urls)} and {len(file_names)}', level=LogLevel.ERROR)
             return
         
         for i in range(len(urls)):
@@ -63,12 +63,12 @@ class FileConnector():
             with open(os.path.join(self.config.download_directory, file_name), 'w') as file:
                 file.write(response.text)
         else:
-            audit_log(f'Could not download file {file_name} from {url}. Got {response.status_code}', level=LogLevel.ERROR)
-        audit_log(f'Downloaded {file_name}')
+            log(f'Could not download file {file_name} from {url}. Got {response.status_code}', level=LogLevel.ERROR)
+        log(f'Downloaded {file_name}')
     
     def __handle_response(self, response) -> bool :
         if(response.status_code > 399):
-            audit_log(f"Response returned status code [{response.status_code}]", level=LogLevel.WARN)
+            log(f"Response returned status code [{response.status_code}]", level=LogLevel.WARN)
             return False
         
         return True
