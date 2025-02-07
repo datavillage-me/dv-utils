@@ -40,9 +40,6 @@ class LogMetadata:
 
 _metadata = LogMetadata()
 
-def get_loki_url() -> str:
-    return default_settings.config("DV_LOKI", "http://loki.datavillage.svc.cluster.local:3100")
-
 def get_app_namespace() -> str | None:
     cage_id = default_settings.config('DV_CAGE_ID', None)
     if not cage_id:
@@ -66,26 +63,10 @@ def create_body(log: str, level: LogLevel, **kwargs):
 
     return log_dict
 
-# TODO: should we also add an optional parameter `start_ns` to automatically add `duration_ns` (or whatever) field?
-def audit_log(log:str, level:LogLevel = LogLevel.INFO, **kwargs):
+def log(log:str, level:LogLevel = LogLevel.INFO, **kwargs):
     if log is None:
         return
     #add timestamp in the log
     data = create_body(log, level, **kwargs)
     json_encoded = json.dumps(data)
     print(json_encoded, file=sys.stderr)
-
-
-
-# TODO: deprecate or delete
-async def audit_log_async(log:str|dict|None=None, level: LogLevel = LogLevel.INFO):
-    loki_url = get_loki_url()
-    if (loki_url == 'STDOUT' or loki_url == 'STDERR'):
-        audit_log(log, level)
-    else:
-        app_namespace = get_app_namespace()
-        body = create_body(log, level)
-        async with httpx.AsyncClient() as client:
-            r = await client.post(url=f'{get_loki_url()}/loki/api/v1/push', json=body, headers={"X-Scope-OrgID": app_namespace, "Content-Type": "application/json"})
-            if(r.status_code!=204):
-                print(f"Error pushing log {r}", flush=True)
