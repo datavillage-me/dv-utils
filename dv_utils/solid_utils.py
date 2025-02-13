@@ -2,7 +2,7 @@ import requests
 import json
 import base64
 from os import environ
-from dv_utils import audit_log, LogLevel
+from dv_utils import log, LogLevel
 
 """
 Fetches a resource from a pod using acp protocol and return as string
@@ -17,7 +17,7 @@ def get_acp_from_pod_url(pod_url: str, path: str, solid_oidp_token: str = None, 
 
   res = requests.get(resource_uri, headers={'Authorization': f"Bearer {uma_token}"})
   if not res.ok:
-    audit_log(f"Could not get file with uma token. Got [{res.status_code}]: {res.text}")
+    log(f"Could not get file with uma token. Got [{res.status_code}]: {res.text}")
     return None
   
   return res.text
@@ -33,7 +33,7 @@ def __get_dv_soidp_token() -> str:
 
   res = requests.get(token_endpoint, params=query_params, auth=(user_name, password))
   if not res.ok:
-    audit_log(f"Could not get token from solid idp. Got [{res.status_code}]: {res.text}", LogLevel.ERROR)
+    log(f"Could not get token from solid idp. Got [{res.status_code}]: {res.text}", LogLevel.ERROR)
 
   return res.json()['token']
 
@@ -65,7 +65,7 @@ def get_uma_token(solid_idp_token: str, resource_uri: str, access_grant: dict | 
     access_grant = find_access_grant(solid_idp_token, resource_uri, vc_configuration['derivationService'], verify_grant)
 
   elif verify_grant and not verify_verifiable_credential(access_grant, vc_configuration['verifierService']):
-    audit_log(f"access grant not valid {access_grant['id']}", LogLevel.ERROR)
+    log(f"access grant not valid {access_grant['id']}", LogLevel.ERROR)
     return None
 
   # Call 3: get uma token without scopes
@@ -82,7 +82,7 @@ def get_permission_ticket(resource_uri: str) -> tuple[str, str]:
   res = requests.get(resource_uri)
 
   if res.status_code != 401:
-    audit_log(f"Expected status code 401, got {res.status_code}", LogLevel.ERROR)
+    log(f"Expected status code 401, got {res.status_code}", LogLevel.ERROR)
     return {}
   
   # UMA as_uri="https://uma...", ticket="ey...",...
@@ -110,7 +110,7 @@ Fetches all access requests for a Solid OIDP token from the vc and finds the fir
 def find_access_grant(solid_idp_token: str, resource_uri: str, vc_derive_endpoint: str, verify_grants: bool = False) -> dict:
   filtered_access_grants = [r for r in get_all_access_grants(vc_derive_endpoint, solid_idp_token) if __is_access_grant_for_resource(resource_uri, r, verify_grants)]
   if not len(filtered_access_grants):
-    audit_log(f"Could not find access request for resource {resource_uri}", LogLevel.ERROR)
+    log(f"Could not find access request for resource {resource_uri}", LogLevel.ERROR)
     return None
   
   return filtered_access_grants[0]
@@ -133,7 +133,7 @@ def get_all_access_grants(vc_derive_endpoint: str, solid_id_token: str, verify_g
 
   res = requests.post(vc_derive_endpoint, json=body, headers=headers)
   if not res.ok:
-    audit_log(f"Could not get all access grants. Got [{res.status_code}]: {res.text}", LogLevel.ERROR)
+    log(f"Could not get all access grants. Got [{res.status_code}]: {res.text}", LogLevel.ERROR)
     return None
 
   res_json = res.json()
@@ -170,7 +170,7 @@ def verify_verifiable_credential(verifiable_credential: dict, vc_verify_endpoint
 
   verify_response = requests.post(vc_verify_endpoint, json=verify_body, headers={'Content-Type': 'application/json'})
   if not verify_response.ok:
-    audit_log(f"could not verify verifiable credential. Got [{verify_response.status_code}]: {verify_response.text}", LogLevel.ERROR)
+    log(f"could not verify verifiable credential. Got [{verify_response.status_code}]: {verify_response.text}", LogLevel.ERROR)
     return False
 
   response_json = verify_response.json()
@@ -202,7 +202,7 @@ def __request_uma_unscoped_token(access_grant_body: dict, uma_token_endpoint:str
   res = requests.post(uma_token_endpoint, payload, headers=headers)
   
   if not res.ok:
-    audit_log(f"Could not get unscoped uma token. Got [{res.status_code}]: {res.text}", LogLevel.ERROR)
+    log(f"Could not get unscoped uma token. Got [{res.status_code}]: {res.text}", LogLevel.ERROR)
     return ""
   
   res_json = res.json()
@@ -225,7 +225,7 @@ def __request_uma_scoped_token(uma_token_endpoint: str, permission_ticket: str, 
   res = requests.post(uma_token_endpoint, payload, headers=headers)
 
   if not res.ok:
-    audit_log(f"Could not get scoped uma token. Got [{res.status_code}]: {res.text}")
+    log(f"Could not get scoped uma token. Got [{res.status_code}]: {res.text}")
     return ""
   
   res_json = res.json()
@@ -254,7 +254,7 @@ def get_access_grant_for_resource(vc_derive_endpoint: str, solid_id_token: str, 
   res = requests.post(vc_derive_endpoint, json=body, headers=headers)
 
   if not res.ok:
-    audit_log(f"Could not search grants at VC. Got [{res.status_code}]: {res.text}", LogLevel.ERROR)
+    log(f"Could not search grants at VC. Got [{res.status_code}]: {res.text}", LogLevel.ERROR)
     return []
   
   return res.json()['verifiableCredential']

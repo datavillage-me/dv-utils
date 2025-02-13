@@ -15,7 +15,7 @@ from ..settings import settings as default_settings
 from ..connectors.connector import populate_configuration
 from ..connectors import s3,gcs,azure,file
 
-from ..log_utils import audit_log, LogLevel
+from ..log_utils import log, LogLevel
 
 logger = logging.getLogger(__name__)
 
@@ -91,11 +91,11 @@ class Contract:
                     scan_result = scan.get_scan_results()
                     if(scan_result['hasErrors'] or scan_result['hasFailures']):
                         string_to_log=f'Quality check done data descriptor {self.data_descriptor_id}. Scan result NOK'
-                        audit_log(string_to_log,LogLevel.WARN)
+                        log(string_to_log,LogLevel.WARN)
                         logging.error(string_to_log)
                     else:
                         string_to_log=f'Quality check done data descriptor {self.data_descriptor_id}. Scan result OK'
-                        audit_log(string_to_log)
+                        log(string_to_log)
                         logging.debug(string_to_log)
                     scan_results[soda_check]=scan_result
                 #return results in json to the caller for further user (show to end user, ...)

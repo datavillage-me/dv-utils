@@ -1,11 +1,9 @@
 import logging
 import copy
 import json
-import duckdb
 
 from dv_utils.connectors.connector import Configuration
 from ..secret_manager import SecretManager
-from ..log_utils import audit_log, LogLevel
 
 logger = logging.getLogger(__name__)
 
