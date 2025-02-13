@@ -5,9 +5,9 @@ build-backend = "poetry.masonry.api"
 [tool]
 [tool.poetry]
 name = "dv-utils"
-version = "2.0.0rc1"
+version = "2.0.0rc3"
 description = "Datavillage python utils for building algorithm running in confidential environment"
-authors = ["Arne Goeteyn <arne@datavillage.ai>"]
+authors = ["Datavillage Technical Team <developer@datavillage.ai>"]
 readme = "README.md"
 repository = "https://github.com/datavillage-me/dv-utils"
 
