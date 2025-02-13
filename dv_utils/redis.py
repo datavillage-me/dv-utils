@@ -3,7 +3,7 @@ This module define the RedisQueue handling class
 """
 import datetime
 import json
-import logging
+from .log_utils import log, LogLevel
 
 import redis
 import os
@@ -85,7 +85,7 @@ class RedisQueue:
         :param stream_name: name of the stream to listen to
         :return: the received message, or None
         """
-        logging.debug("Waiting for message...")
+        log("Waiting for message...", LogLevel.DEBUG)
         messages = self.redis.xreadgroup(
             self.consumer_group,
             self.consumer_name,
@@ -101,6 +101,6 @@ class RedisQueue:
                 for msg_id, msg_data in messages[0][1]
             ][0]
             msg_id = message["msg_id"]
-            logging.debug(f"Received message {msg_id}...")
+            log(f"Received message {msg_id}...", LogLevel.DEBUG)
             return message
         return None
