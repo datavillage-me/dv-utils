@@ -1,14 +1,10 @@
 import json
 import re
-import os
 import requests
-import logging
 import importlib.resources as importlib_resources
 
-from ..settings import Settings
 from ..settings import settings as default_settings
-
-logger = logging.getLogger(__name__)
+from ..log_utils import log, LogLevel
 
 class Configuration():
     schema_file: str = None
@@ -58,7 +54,7 @@ def populate_configuration(connector_id, config: Configuration, config_dir='/res
 
         return config
     except Exception as inst:
-        logger.error(f"Not able to open connector configuration file: {inst}")
+        log(f"Not able to open connector configuration file: {inst}", LogLevel.ERROR)
         raise
         
 
@@ -79,7 +75,7 @@ def __parse_boolean_value(value: str):
     elif(value_cleaned in ['false', '0']):
         return False
     
-    logger.warn(f"Value {value} not a valid boolean value. Using `false`")
+    log(f"Value {value} not a valid boolean value. Using `false`", LogLevel.WARN)
     return False
 
 def __substitude_env_vars(d):
@@ -108,7 +104,7 @@ def is_valid_configuration(config: Configuration):
         is_required = bool(schema_field.get('required'))
 
         if not value and is_required:
-            logger.error(f"Missing configured field <{p}>")
+            log(f"Missing configured field <{p}>", LogLevel.ERROR)
             return False
 
     return True

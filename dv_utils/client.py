@@ -2,17 +2,14 @@
 This module define the client class to interact with the Datavillage API.
 """
 
-import logging
 from typing import Literal
 
-import json
 import rdflib
 import requests
 
 from .settings import Settings
 from .settings import settings as default_settings
-
-logger = logging.getLogger(__name__)
+from .log_utils import log, LogLevel
 
 
 class Client:
@@ -38,7 +35,7 @@ class Client:
             )
             return public_key
         except Exception as e:
-            logger.error(e)
+            log(str(e), LogLevel.ERROR)
             return None
 
     def get_list_of_participants(self, collaboration_space_id: str, role: str):
@@ -55,7 +52,7 @@ class Client:
                 filtered_participants=[x for x in list_participants if x["invite"]["status"]=="Accepted"]
             return filtered_participants
         except Exception as e:
-            logger.error(e)
+            log(str(e), LogLevel.ERROR)
             return None
 
     def get_users(self):
@@ -94,7 +91,7 @@ class Client:
 
         # currently only 'inferences' and 'explains' are supported
         if not filename in ["inferences", "explains"]:
-            logger.error("Unsupported result file name: " + filename)
+            log("Unsupported result file name: " + filename, LogLevel.ERROR)
 
         self.request(
             f"/clients/{self.settings.collaboration_space_owner_id}/applications/{self.settings.collaboration_space_id}/activeUsers/{user_id}/{filename}",
@@ -121,7 +118,7 @@ class Client:
             _type_: _description_
         """
         url = f"{self.settings.base_url}{path}"
-        logger.debug(f"[HTTP {method}] {url}")
+        log(f"[HTTP {method}] {url}", LogLevel.DEBUG)
 
         headers = {"Authorization": f"Bearer {self.settings.token}"}
         if content_type:

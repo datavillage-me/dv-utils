@@ -3,7 +3,6 @@ This module define the client class to interact with the secret manager.
 The secret manager end points are only accssible by the algorithm running in the confidential environement and are not exposed to the internet.
 """
 
-import logging
 import json
 import io
 import requests
@@ -14,8 +13,7 @@ from typing import Literal
 from .settings import Settings
 from .settings import settings as default_settings
 from .client import Client
-
-logger = logging.getLogger(__name__)
+from .log_utils import log, LogLevel
 
 
 class SecretManager:
@@ -38,7 +36,7 @@ class SecretManager:
             )
             return signed_file
         except Exception as e:
-            logger.error(e)
+            log(str(e), LogLevel.ERROR)
             return None
     
     def sign_string(self, content:str):
@@ -51,7 +49,7 @@ class SecretManager:
             files={'file': ('file.txt', file_like_object)}
             return self.sign(files)
         except Exception as e:
-            logger.error(e)
+            log(str(e), LogLevel.ERROR)
             return None
     
     def decrypt(self, files):
@@ -68,7 +66,7 @@ class SecretManager:
             )
             return decrypted_file
         except Exception as e:
-            logger.error(e)
+            log(str(e), LogLevel.ERROR)
             return None
     
     def decrypt_encoded_string(self, content:str):
@@ -81,7 +79,7 @@ class SecretManager:
             files={'message': ('message.txt', file_like_object)}
             return self.decrypt(files)
         except Exception as e:
-            logger.error(e)
+            log(str(e), LogLevel.ERROR)
             return None
     
     def sign_json(self, collaboration_space_id:str,json_payload:dict):
@@ -102,7 +100,7 @@ class SecretManager:
             jws["signature"]=signature
             return jws
         except Exception as e:
-            logger.error(e)
+            log(str(e), LogLevel.ERROR)
             return None
     
     def base64_encode_string(self, content:str):
@@ -127,7 +125,7 @@ class SecretManager:
               return decoded_bytes.decode('utf-8')
           return decoded_bytes
       except Exception as e:
-          logger.error(f"Base64 decoding failed: {e}")
+          log(str(e), LogLevel.ERROR)
           raise
 
     def request(
@@ -151,7 +149,7 @@ class SecretManager:
             _type_: _description_
         """
         url = f"{self.base_url}{path}"
-        logger.debug(f"[HTTP {method}] {url}")
+        log(f"[HTTP {method}] {url}", LogLevel.DEBUG)
 
         headers = {}
         if content_type:

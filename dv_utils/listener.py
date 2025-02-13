@@ -6,7 +6,7 @@ from typing import Any, Callable
 
 from .process import process_event_dummy
 from .redis import RedisQueue
-from .log_utils import log, set_event
+from .log_utils import log, set_event, LogLevel
 import time
 
 class DefaultListener:
@@ -19,13 +19,22 @@ class DefaultListener:
     ):
         # Instantiate the local Datavillage Redis queue
         redis_queue = RedisQueue()
-        redis_queue.create_consumer_group()
+        try:
+         redis_queue.create_consumer_group()
+        except Exception as e:
+           log(f"could not create consumer group: {str(e)}", LogLevel.ERROR)
 
         if(daemon):
            log(log="Algo Event Listener started", app="algo")
 
         while True:
-           evt = redis_queue.listen_once()
+           evt = None
+           try:
+            evt = redis_queue.listen_once()
+           except Exception as e:
+              log(f"could not listen to redis: {str(e)}")
+              break
+           
            if evt:
                start = time.time()
                evt_type =evt.get("type", "MISSING_TYPE")
