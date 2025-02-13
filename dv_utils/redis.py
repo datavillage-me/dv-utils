@@ -29,7 +29,9 @@ class RedisQueue:
         else:
             cage_id = os.environ.get("DV_CAGE_ID")
             self.consumer_name = f"cage-{cage_id}"
+
         self.redis = redis.Redis(host, port, db=0)
+        
 
     def create_consumer_group(self, stream_names = ["events"]) -> None:
         """
@@ -39,10 +41,8 @@ class RedisQueue:
             try:
                 self.redis.xgroup_create(s, self.consumer_group, mkstream=True)
             except redis.exceptions.ResponseError as error:
-                if str(error).startswith("BUSYGROUP"):
-                    pass
-                else:
-                    raise error
+                log(f"could not create consumer group {s}: {str(error)}", LogLevel.ERROR)
+                pass
 
     def destroy_consumer_group(self) -> None:
         """
