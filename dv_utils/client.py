@@ -7,11 +7,30 @@ from typing import Literal
 import rdflib
 import requests
 
+import os
+
 from .settings import Settings
 from .settings import settings as default_settings
 from .log_utils import log, LogLevel
+from warnings import deprecated
+
+from control_plane_cage_client import AuthenticatedClient
+import requests
+
+def create_client() -> AuthenticatedClient:
+    secret_manager_url = os.environ.get("SECRET_MANAGER_URL", None)
+    if not secret_manager_url:
+        log("no secret manager url was given", LogLevel.ERROR)
+        return None
+    control_plane_url = os.environ.get("CONTROL_PLANE_URL", None)
+    if not control_plane_url:
+        log("no control plane url was given", LogLevel.ERROR)
+
+    token = requests.get(f"{secret_manager_url}/control-plane-token").text.strip()
+    return AuthenticatedClient(base_url=control_plane_url, token=token)
 
 
+@deprecated
 class Client:
     """
     Http client to interact with the Datavillage API.
