@@ -12,7 +12,6 @@ import os
 from .settings import Settings
 from .settings import settings as default_settings
 from .log_utils import log, LogLevel
-from warnings import deprecated
 
 from control_plane_cage_client import AuthenticatedClient
 import requests
@@ -30,7 +29,6 @@ def create_client() -> AuthenticatedClient:
     return AuthenticatedClient(base_url=control_plane_url, token=token)
 
 
-@deprecated
 class Client:
     """
     Http client to interact with the Datavillage API.
