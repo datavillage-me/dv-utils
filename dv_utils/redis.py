@@ -78,14 +78,15 @@ class RedisQueue:
         )
         return msg_id
 
-    def listen_once(self, timeout=120, stream_name = "events"):
+    def listen_once(self, timeout=120, stream_name = "events", debug_log = True):
         """
         Listen to the redis queue until one message is obtained, or timeout is reached
         :param timeout: timeout delay in seconds
         :param stream_name: name of the stream to listen to
         :return: the received message, or None
         """
-        log("Waiting for message...", LogLevel.DEBUG)
+        if debug_log:
+            log("Waiting for message...", LogLevel.DEBUG)
         messages = self.redis.xreadgroup(
             self.consumer_group,
             self.consumer_name,
@@ -100,7 +101,8 @@ class RedisQueue:
                 | {"msg_id": msg_id.decode()}
                 for msg_id, msg_data in messages[0][1]
             ][0]
-            msg_id = message["msg_id"]
-            log(f"Received message {msg_id}...", LogLevel.DEBUG)
+            if debug_log:
+                msg_id = message["msg_id"]
+                log(f"Received message {msg_id}...", LogLevel.DEBUG)
             return message
         return None
