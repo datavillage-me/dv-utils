@@ -6,7 +6,7 @@ from typing import Any, Callable
 
 from .process import process_event_dummy
 from .redis import RedisQueue
-from .log_utils import log, set_event, LogLevel
+from .log_utils import log, set_event, LogLevel, reset_event
 import time
 
 class DefaultListener:
@@ -51,7 +51,7 @@ class DefaultListener:
                   if(log_events):
                      log("Event processing done", evt=evt_type, state="DONE", app="algo", processing_time=time.time()-start)
                
-          
+               reset_event() 
            if not daemon:
                #stop after one event
                break

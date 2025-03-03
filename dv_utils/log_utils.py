@@ -34,6 +34,11 @@ class LogMetadata:
         self.evt_stream = evt_stream
         self.evt_received = evt_received_ns if evt_received_ns is not None else time.time_ns()
 
+    def reset_event(self):
+        self.evt = None
+        self.evt_stream = None
+        self.evt_received = None
+
     def __iter__(self):
         for key in self.__dict__:
             yield key, getattr(self, key)
@@ -49,6 +54,9 @@ def get_app_namespace() -> str | None:
 
 def set_event(evt: dict, stream: str = "events", evt_received_ns: int | None = None):
     _metadata.set_event(evt['type'], stream, evt_received_ns)
+
+def reset_event():
+    _metadata.reset_event()
 
 def create_body(log: str, level: LogLevel, **kwargs):
     log_dict = dict()
