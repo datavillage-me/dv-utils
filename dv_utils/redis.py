@@ -41,8 +41,10 @@ class RedisQueue:
             try:
                 self.redis.xgroup_create(s, self.consumer_group, mkstream=True)
             except redis.exceptions.ResponseError as error:
-                log(f"could not create consumer group {s}: {str(error)}", LogLevel.ERROR)
-                pass
+                if str(error).startswith("BUSYGROUP"):
+                    pass
+                else:
+                    log(f"could not create consumer group {s}: {str(error)}", LogLevel.ERROR)
 
     def destroy_consumer_group(self) -> None:
         """
