@@ -6,7 +6,7 @@ from typing import Any, Callable
 
 from ..process import process_event_dummy
 from ..redis import RedisQueue
-from ..log_utils import log, set_event, reset_event, LogLevel
+from ..log_utils import log, set_event, LogLevel, reset_event
 import time
 
 class PriorityListener:
