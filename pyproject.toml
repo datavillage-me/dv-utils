@@ -31,6 +31,7 @@ duckdb = "^1.0.0"
 datacontract-cli = "^0.10.14"
 pyyaml = "6.0.1"
 cloudscraper = "*"
+control-plane-cage-client = "1.0.0rc22"
 
 
 
