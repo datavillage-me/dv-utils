@@ -1,5 +1,4 @@
 .env
-.env
 *.iml
 **/__pycache__
 *.ipynb_checkpoints*
@@ -7,3 +6,4 @@ dist/
 *.egg-info/
 scrapbook/
 .DS_Store
+.venv
