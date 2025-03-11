@@ -10,6 +10,9 @@ def get_secret_for_collaborator(collaborator_id: str) -> str:
   secret_manager_key = f"collaborator-{collaborator_id}-server"
   return __get_secret(secret_manager_key)
 
+def get_secret_for_client(client_id: str, secret_id: str) -> str:
+  secret_manager_key = f"client-{client_id}-{secret_id}"
+  return __get_secret(secret_manager_key)
 
 def __get_secret(secret_id: str) -> str:
   secret_manager_url = os.environ.get("SECRET_MANAGER_URL", None)
