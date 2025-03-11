@@ -23,16 +23,23 @@ class LogLevel(Enum):
 # Do not create an object of this class in code
 class LogMetadata:
     def __init__(self):
-        self.evt = None
+        self.evt_type = None
+        self.msg_id = None
         self.evt_received = None
         self.evt_stream = None
         self.cage_id = default_settings.config("DV_CAGE_ID", None)
         self.lib_version = version('dv-utils')
 
-    def set_event(self, evt: str, evt_stream: str, evt_received_ns: int | None = None):
-        self.evt = evt
+    def set_event(self, evt: dict, evt_stream: str, evt_received_ns: int | None = None):
+        self.evt_type = evt.get("type", "UNKOWN_TYPE")
+        self.msg_id = evt.get("msg_id", "UNKOWN_MSG_ID")
         self.evt_stream = evt_stream
         self.evt_received = evt_received_ns if evt_received_ns is not None else time.time_ns()
+
+    def reset_event(self):
+        self.evt = None
+        self.evt_stream = None
+        self.evt_received = None
 
     def __iter__(self):
         for key in self.__dict__:
@@ -48,7 +55,10 @@ def get_app_namespace() -> str | None:
         return f'app-{cage_id}'
 
 def set_event(evt: dict, stream: str = "events", evt_received_ns: int | None = None):
-    _metadata.set_event(evt['type'], stream, evt_received_ns)
+    _metadata.set_event(evt, stream, evt_received_ns)
+
+def reset_event():
+    _metadata.reset_event()
 
 def create_body(log: str, level: LogLevel, **kwargs):
     log_dict = dict()

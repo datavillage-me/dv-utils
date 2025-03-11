@@ -6,7 +6,7 @@ from typing import Any, Callable
 
 from ..process import process_event_dummy
 from ..redis import RedisQueue
-from ..log_utils import log, set_event
+from ..log_utils import log, set_event, LogLevel, reset_event
 import time
 
 class PriorityListener:
@@ -29,10 +29,15 @@ class PriorityListener:
         if(daemon):
            log(log="Algo Event Listener started", app="algo")
 
+        log("Waiting for message...", LogLevel.DEBUG)
         while True:
           evt, stream_name = self.__listen_once()
           if evt:
+            msg_id = evt.get("msg_id", "UNKOWN_ID")
+            log(f"Received message {msg_id}...", LogLevel.DEBUG)
             self.__handle_event(evt, log_events, stream_name)
+            if daemon:
+              log("Waiting for message...", LogLevel.DEBUG)
           if not daemon:
           #stop after one event
             break
@@ -40,9 +45,9 @@ class PriorityListener:
         if(daemon):
            log(log="Algo Event Listener Ended", app="algo")
 
-    def __listen_once(self) -> tuple[str,str]:
+    def __listen_once(self) -> tuple[dict,str]:
       for stream_name in self.stream_priorities:
-        evt = self.redis_queue.listen_once(stream_name=stream_name, timeout=1)
+        evt = self.redis_queue.listen_once(stream_name=stream_name, timeout=1, debug_log=False)
         if evt:
           return (evt, stream_name)
       
@@ -63,5 +68,6 @@ class PriorityListener:
       else:
         if(log_events):
           log("Event processing done", evt=evt_type, state="DONE", app="algo", processing_time=time.time()-start)
+      reset_event()
       
 
