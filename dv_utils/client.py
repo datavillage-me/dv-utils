@@ -13,7 +13,7 @@ from .settings import Settings
 from .settings import settings as default_settings
 from .log_utils import log, LogLevel
 
-from control_plane_cage_client import AuthenticatedClient
+from control_plane_cage_client import AuthenticatedClient, Client as CPClient
 import requests
 
 def create_client() -> AuthenticatedClient:
@@ -26,8 +26,18 @@ def create_client() -> AuthenticatedClient:
         log("no control plane url was given", LogLevel.ERROR)
 
     token = requests.get(f"{secret_manager_url}/control-plane-token").text.strip()
+    log(f"token in dv-utils: {token}")
     return AuthenticatedClient(base_url=control_plane_url, token=token)
 
+def create_debug_client() -> AuthenticatedClient:
+    control_plane_url = os.environ.get("CONTROL_PLANE_URL", None)
+    if not control_plane_url:
+        log("no control plane url was given", LogLevel.ERROR) 
+    
+    cage_id = os.environ.get("DV_CAGE_ID", None)
+    if not cage_id:
+        log("no cage id was given", LogLevel.ERROR)
+    return CPClient(base_url=control_plane_url).with_headers({"X-Cage-Id": cage_id})
 
 class Client:
     """
