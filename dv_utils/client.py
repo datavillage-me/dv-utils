@@ -13,7 +13,7 @@ from .settings import Settings
 from .settings import settings as default_settings
 from .log_utils import log, LogLevel
 
-from control_plane_cage_client import AuthenticatedClient, Client as CPClient
+from control_plane_cage_client import AuthenticatedClient
 import requests
 
 def create_client() -> AuthenticatedClient:
