@@ -1,5 +1,5 @@
 import os
-from data_engine_client import Client
+from dv_data_engine_client import Client
 from .log_utils import log, LogLevel
 
 def create_client() -> Client:

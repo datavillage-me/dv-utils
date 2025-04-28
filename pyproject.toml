@@ -32,7 +32,7 @@ datacontract-cli = "^0.10.14"
 pyyaml = "6.0.1"
 cloudscraper = "*"
 control-plane-cage-client = "1.0.0rc23"
-data-engine-client = {path = "/Users/michiel/Documents/Datavillage/data-engine/api/clients/python_cage_client"}
+dv-data-engine-client = "0.1.0rc10"
 
 
 
