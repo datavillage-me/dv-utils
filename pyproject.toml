@@ -32,7 +32,7 @@ datacontract-cli = "^0.10.14"
 pyyaml = "6.0.1"
 cloudscraper = "*"
 control-plane-cage-client = "1.0.0rc37"
-dv-data-engine-client = "0.2.0rc3"
+dv-data-engine-client = "0.2.0rc4"
 
 
 
