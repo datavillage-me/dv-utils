@@ -5,7 +5,7 @@ build-backend = "poetry.masonry.api"
 [tool]
 [tool.poetry]
 name = "dv-utils"
-version = "2.0.0rc9"
+version = "2.0.0rc13"
 description = "Datavillage python utils for building algorithm running in confidential environment"
 authors = ["Datavillage Technical Team <developer@datavillage.ai>"]
 readme = "README.md"
@@ -31,7 +31,8 @@ duckdb = "^1.0.0"
 datacontract-cli = "^0.10.14"
 pyyaml = "6.0.1"
 cloudscraper = "*"
-control-plane-cage-client = "1.0.0rc23"
+control-plane-cage-client = "1.0.0rc37"
+dv-data-engine-client = "0.3.0rc3"
 
 
 

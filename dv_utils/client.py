@@ -24,6 +24,7 @@ def create_client() -> AuthenticatedClient:
     control_plane_url = os.environ.get("CONTROL_PLANE_URL", None)
     if not control_plane_url:
         log("no control plane url was given", LogLevel.ERROR)
+        return None
 
     token = requests.get(f"{secret_manager_url}/control-plane-token").text.strip()
     return AuthenticatedClient(base_url=control_plane_url, token=token)
