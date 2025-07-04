@@ -1,15 +1,12 @@
 from dv_utils.connectors.connector import Configuration
 from ..secret_manager import SecretManager
 from urllib.parse import urlparse
-import logging
 import requests
 import os
 import json
 import copy
 import cloudscraper
-from ..log_utils import audit_log, LogLevel
-
-logger = logging.getLogger(__name__)
+from ..log_utils import log, LogLevel
 
 class FileConfiguration(Configuration):
     schema_file = "file.json"
@@ -45,7 +42,7 @@ class FileConnector():
         file_names = self.config.file_name.split(',')
 
         if len(urls) != len(file_names):
-            audit_log(f'Length of urls and file list should be the same. Got {len(urls)} and {len(file_names)}', level=LogLevel.ERROR)
+            log(f'Length of urls and file list should be the same. Got {len(urls)} and {len(file_names)}', level=LogLevel.ERROR)
             return
         
         for i in range(len(urls)):
@@ -63,12 +60,12 @@ class FileConnector():
             with open(os.path.join(self.config.download_directory, file_name), 'w') as file:
                 file.write(response.text)
         else:
-            audit_log(f'Could not download file {file_name} from {url}. Got {response.status_code}', level=LogLevel.ERROR)
-        audit_log(f'Downloaded {file_name}')
+            log(f'Could not download file {file_name} from {url}. Got {response.status_code}', level=LogLevel.ERROR)
+        log(f'Downloaded {file_name}')
     
     def __handle_response(self, response) -> bool :
         if(response.status_code > 399):
-            audit_log(f"Response returned status code [{response.status_code}]", level=LogLevel.WARN)
+            log(f"Response returned status code [{response.status_code}]", level=LogLevel.WARN)
             return False
         
         return True
@@ -88,7 +85,7 @@ class FileConnector():
         data_source_location_for_model=self.config.location
         if model_key!= "":
             data_source_location_for_model=self.config.location.replace(self.NAMING_CONVENTION_MODEL.format(),model_key)
-        logger.debug(f"Used data source location: {data_source_location_for_model}")
+        log(f"Used data source location: {data_source_location_for_model}", LogLevel.DEBUG)
         if options!="":
                 options=","+options
         if self.config.file_format=="parquet":
@@ -100,14 +97,14 @@ class FileConnector():
         elif self.config.file_format=="csv":
             return f"read_csv('{data_source_location_for_model}'{options})"
         else:
-            logger.error("Format not supported by duckdb")
+            log("Format not supported by duckdb", LogLevel.DEBUG)
         
     
     #TODO code duplicate with other connectors.
     def export_duckdb(self,model_key):
         #replace {model} by the model key if any reference to {model}  in the data source location
         data_source_location_for_model=self.config.location.replace(self.NAMING_CONVENTION_MODEL.format(),model_key)
-        logger.debug(f"Used data source location: {data_source_location_for_model}")
+        log(f"Used data source location: {data_source_location_for_model}", LogLevel.DEBUG)
         target=""
         if self.config.file_format=="parquet":
             if self.config.encryption_key!="":
@@ -118,7 +115,7 @@ class FileConnector():
         elif self.config.file_format=="csv":
             target=f"'{data_source_location_for_model}' (HEADER, DELIMITER ',')"
         else:
-            logger.error("Format not supported by duckdb")
+            log("Format not supported by duckdb", LogLevel.ERROR)
         export_sql=f"COPY {model_key} TO {target}"
         self.duckdb_connection.sql(export_sql)
     

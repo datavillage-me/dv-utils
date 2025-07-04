@@ -2,6 +2,7 @@
 This module defines utility functions for interaction with the loki server
 """
 import time
+import json
 import datetime
 import httpx
 import sys
@@ -22,25 +23,29 @@ class LogLevel(Enum):
 # Do not create an object of this class in code
 class LogMetadata:
     def __init__(self):
-        self.evt = None
+        self.evt_type = None
+        self.msg_id = None
         self.evt_received = None
         self.evt_stream = None
-        self.app_id = default_settings.config("DV_APP_ID", None)
+        self.cage_id = default_settings.config("DV_CAGE_ID", None)
         self.lib_version = version('dv-utils')
 
     def set_event(self, evt: dict, evt_stream: str, evt_received_ns: int | None = None):
-        self.evt = evt
+        self.evt_type = evt.get("type", "UNKOWN_TYPE")
+        self.msg_id = evt.get("msg_id", "UNKOWN_MSG_ID")
         self.evt_stream = evt_stream
         self.evt_received = evt_received_ns if evt_received_ns is not None else time.time_ns()
+
+    def reset_event(self):
+        self.evt = None
+        self.evt_stream = None
+        self.evt_received = None
 
     def __iter__(self):
         for key in self.__dict__:
             yield key, getattr(self, key)
 
 _metadata = LogMetadata()
-
-def get_loki_url() -> str:
-    return default_settings.config("DV_LOKI", "http://loki.datavillage.svc.cluster.local:3100")
 
 def get_app_namespace() -> str | None:
     cage_id = default_settings.config('DV_CAGE_ID', None)
@@ -51,6 +56,9 @@ def get_app_namespace() -> str | None:
 
 def set_event(evt: dict, stream: str = "events", evt_received_ns: int | None = None):
     _metadata.set_event(evt, stream, evt_received_ns)
+
+def reset_event():
+    _metadata.reset_event()
 
 def create_body(log: str, level: LogLevel, **kwargs):
     log_dict = dict()
@@ -65,28 +73,10 @@ def create_body(log: str, level: LogLevel, **kwargs):
 
     return log_dict
 
-# TODO: should we also add an optional parameter `start_ns` to automatically add `duration_ns` (or whatever) field?
-def audit_log(log:str, level:LogLevel = LogLevel.AUDIT, **kwargs):
+def log(log:str, level:LogLevel = LogLevel.INFO, **kwargs):
     if log is None:
         return
     #add timestamp in the log
     data = create_body(log, level, **kwargs)
-    now = datetime.datetime.now()
-    formated_now = now.strftime('%Y-%m-%d %H:%M:%S.%f')
-    header=formated_now[:-3] + " - AUDIT - "
-    print(header+str(data), file=sys.stderr)
-
-
-
-# TODO: deprecate or delete
-async def audit_log_async(log:str|dict|None=None, level: LogLevel = LogLevel.INFO):
-    loki_url = get_loki_url()
-    if (loki_url == 'STDOUT' or loki_url == 'STDERR'):
-        audit_log(log, level)
-    else:
-        app_namespace = get_app_namespace()
-        body = create_body(log, level)
-        async with httpx.AsyncClient() as client:
-            r = await client.post(url=f'{get_loki_url()}/loki/api/v1/push', json=body, headers={"X-Scope-OrgID": app_namespace, "Content-Type": "application/json"})
-            if(r.status_code!=204):
-                print(f"Error pushing log {r}", flush=True)
+    json_encoded = json.dumps(data)
+    print(json_encoded, file=sys.stderr)

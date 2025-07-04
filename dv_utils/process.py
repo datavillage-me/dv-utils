@@ -1,12 +1,11 @@
 """
-This module define a dummy event processor as an example.
+This module defines a dummy event processor as an example.
 """
-import logging
 import time
+from .log_utils import log, LogLevel
 
 from .client import Client
 
-logger = logging.getLogger(__name__)
 
 
 def process_event_dummy(evt: dict):
@@ -16,21 +15,21 @@ def process_event_dummy(evt: dict):
     start = time.time()
 
     try:
-        logger.info(f"Processing event {evt}")
+        log(f"Processing event {evt}", LogLevel.INFO)
 
         client = Client()
 
         # Use userIds provided in the event, or get all active users for this application
         user_ids = evt.get("userIds") if "userIds" in evt else client.get_users()
 
-        logger.info(f"Processing {len(user_ids)} users")
+        log(f"Processing {len(user_ids)} users", LogLevel.INFO)
         for user_id in user_ids:
             try:
 
                 # retrieve data graph for user
                 user_data = client.get_data(user_id)
 
-                logger.info(f"{len(user_data)} statements for user {user_id}")
+                log(f"{len(user_data)} statements for user {user_id}", LogLevel.INFO)
 
                 # for the sake of this example, write some RDF with the number of user statements into the user's pod
                 client.write_results(
@@ -41,10 +40,10 @@ def process_event_dummy(evt: dict):
 
             # pylint: disable=broad-except
             except Exception as err:
-                logger.warning(f"Failed to process user {user_id} : {err}")
+                log(f"Failed to process user {user_id} : {err}", LogLevel.WARN)
 
     # pylint: disable=broad-except
     except Exception as err:
-        logger.error(f"Failed processing event: {err}")
+        log(f"Failed processing event: {err}", LogLevel.ERROR)
     finally:
-        logger.info(f"Processed event in {time.time() - start:.{3}f}s")
+        log(f"Processed event in {time.time() - start:.{3}f}s", LogLevel.INFO)

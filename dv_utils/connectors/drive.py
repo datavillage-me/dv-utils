@@ -1,14 +1,11 @@
 from dv_utils.connectors.connector import Configuration, is_valid_configuration
 import io
-import logging
 import os
 import copy
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
-
-
-logger = logging.getLogger(__name__)
+from ..log_utils import log, LogLevel
 
 scope = ['https://www.googleapis.com/auth/drive']
 
@@ -40,7 +37,7 @@ class DriveConnector():
             self.config.file_name = self.config.resource_name
 
         if not is_valid_configuration(self.config):
-            logger.error('Configuration is not valid')
+            log('Configuration is not valid', LogLevel.ERROR)
 
         json_config = {'private_key': self.config.private_key,
                        'client_email': self.config.client_email,
@@ -61,7 +58,7 @@ class DriveConnector():
             results = self.service.files().list().execute()
             items = results.get('files', [])
             if not items:
-                logger.error("No files available on Google Drive")
+                log("No files available on Google Drive", LogLevel.ERROR)
                 return
             else:
                 def is_item(item):
@@ -73,7 +70,7 @@ class DriveConnector():
                         found = item
 
             if not found:
-                logger.error(f"File <{self.config.resource_name}> not found")
+                log(f"File <{self.config.resource_name}> not found", LogLevel.ERROR)
                 return
         else:
             found = {'id': self.config.resource_id}
@@ -93,7 +90,7 @@ class DriveConnector():
     def push(self, file_path):
 
         if not self.config.resource_directory_id:
-            logger.error("No resource directory configured")
+            log("No resource directory configured", LogLevel.ERROR)
             return
 
         file_metadata = {"name": self.config.resource_name,

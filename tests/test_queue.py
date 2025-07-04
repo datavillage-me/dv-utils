@@ -23,10 +23,10 @@ class Test(unittest.TestCase):
         }
 
         self.redis_queue = RedisQueue()
-        self.redis_queue.create_consummer_group()
+        self.redis_queue.create_consumer_group()
 
     def tearDown(self):
-        self.redis_queue.destroy_consummer_group()
+        self.redis_queue.destroy_consumer_group()
 
     def test_process_queue_once(self):
         """

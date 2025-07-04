@@ -1,7 +1,6 @@
 """
 This module defines the data contracts for the dv-utils package.
 """
-import logging
 import yaml
 import json
 
@@ -15,10 +14,7 @@ from ..settings import settings as default_settings
 from ..connectors.connector import populate_configuration
 from ..connectors import s3,gcs,azure,file
 
-from ..log_utils import audit_log, LogLevel
-
-logger = logging.getLogger(__name__)
-
+from ..log_utils import log, LogLevel
 
 class Contract:
 
@@ -39,20 +35,20 @@ class Contract:
             self.__init_data_connector(data_source_type)
             data_contract_yaml=self.__data_descriptor_to_data_contract(data_descriptor)
             try:
-                logger.debug(f"Create data contract object")
+                log(f"Create data contract object", LogLevel.DEBUG)
                 self.data_contract = DataContract(data_contract_str=json.dumps(data_contract_yaml))
             except Exception as inst:
-                logger.error(f"Unable to create data contract: {inst}")
+                log(f"Unable to create data contract: {inst}", LogLevel.ERROR)
                 raise
         else:  
-            logger.error(f"Unable to create data contract - No data descriptor available")
+            log(f"Unable to create data contract - No data descriptor available", LogLevel.ERROR)
             raise Exception(f"Unable to create data contract - No data descriptor available")
     
     def check_contract(self):   
         try:
             if self.connector!=None and self.connector.config.location!=None and self.connector.config.file_format!=None:
                 #use duck db to fetch data for quality check
-                logger.debug(f"Connect with duckdb")
+                log(f"Connect with duckdb", LogLevel.DEBUG)
                 con = duckdb.connect(database=":memory:")
                 con = self.connector.add_duck_db_connection(con)
                 #loop on all models
@@ -67,17 +63,16 @@ class Contract:
                         CREATE OR REPLACE VIEW "{model_key}" AS SELECT * FROM {self.connector.get_duckdb_source(model_key,options)};
                         """)
                     else:
-                        logger.error(f"{self.connector.format} not supported for data contract check. Only parquet, json or csv are supported") 
+                        log(f"{self.connector.format} not supported for data contract check. Only parquet, json or csv are supported", LogLevel.ERROR) 
                         raise Exception("Unable to check data contract")
                 #Start quality check with soda
-                logger.debug(f"Running engine soda-core")
-                logger.debug(f"Export data contract to soda checks")
+                log(f"Running engine soda-core", LogLevel.DEBUG)
                 sodacl_contract=self.data_contract.export("sodacl")
                 sodacl_contract_yaml=yaml.safe_load(sodacl_contract)
                 scan_results={}
                 for soda_check in sodacl_contract_yaml:
                     soda_check_yaml=sodacl_contract_yaml.get(soda_check, [])
-                    logging.debug("Starting soda scan for model - "+soda_check)
+                    log("Starting soda scan for model - "+soda_check, LogLevel.DEBUG)
                     scan = Scan()
                     scan.add_duckdb_connection(duckdb_connection=con, data_source_name=self.connector.config.connector_id)
                     scan.set_data_source_name(self.connector.config.connector_id)
@@ -86,46 +81,44 @@ class Contract:
                     scan.execute()
                     #This is a bug in soda. I need to "flush" the logs to avoid keeping logs error items in log history
                     scan._logs=None
-                    logging.debug("Finished soda scan")
+                    log("Finished soda scan", LogLevel.DEBUG)
                     #get results
                     scan_result = scan.get_scan_results()
                     if(scan_result['hasErrors'] or scan_result['hasFailures']):
                         string_to_log=f'Quality check done data descriptor {self.data_descriptor_id}. Scan result NOK'
-                        audit_log(string_to_log,LogLevel.WARN)
-                        logging.error(string_to_log)
+                        log(string_to_log,LogLevel.WARN)
                     else:
                         string_to_log=f'Quality check done data descriptor {self.data_descriptor_id}. Scan result OK'
-                        audit_log(string_to_log)
-                        logging.debug(string_to_log)
+                        log(string_to_log, LogLevel.DEBUG)
                     scan_results[soda_check]=scan_result
                 #return results in json to the caller for further user (show to end user, ...)
                 return scan_results
             else:
-                logger.error(f"No connector defined in the data contract or missing argument (location or format)") 
+                log(f"No connector defined in the data contract or missing argument (location or format)", LogLevel.ERROR) 
                 raise Exception("Unable to check data contract")
         except Exception as inst:
-            logger.error(f"Unable to check data contract {inst}")
+            log(f"Unable to check data contract {inst}", LogLevel.ERROR)
             raise
 
     def export_contract_to_sql_create_table(self,model_key:str): 
-        logger.debug(f"Get all fields from data contract model - "+model_key)
+        log(f"Get all fields from data contract model - "+model_key, LogLevel.DEBUG)
         spec_yaml = yaml.safe_load(self.data_contract.get_data_contract_specification().to_yaml())
         fields=spec_yaml["models"][model_key]["fields"]
-        logger.debug(f"Create SQL query for model - "+model_key)
+        log(f"Create SQL query for model - "+model_key, LogLevel.DEBUG)
         if len(fields)<=0:
-            logger.error(f"Unable to initialise export contract to sql create table: No fields in the data contract")
+            log(f"Unable to initialise export contract to sql create table: No fields in the data contract", LogLevel.ERROR)
             raise 
         query="CREATE OR REPLACE TABLE "+model_key+ "("
         for field_name in fields:
             field_type=spec_yaml["models"][model_key]["fields"][field_name]["type"]
             query=query+str(field_name)+" "+field_type.upper()+","
         query=query[:-1]+")"
-        print(query)
+        log(query, LogLevel.DEBUG)
         return query
 
     def __init_data_connector(self,data_source_type: str):
         try:
-            logger.debug(f"Initialise data connector for data source: type={data_source_type}")
+            log(f"Initialise data connector for data source: type={data_source_type}", LogLevel.DEBUG)
             #initialise datavillage connector to get access to data source access keys
             if data_source_type=="S3":
                 config = s3.S3Configuration()
@@ -156,10 +149,10 @@ class Contract:
                     populate_configuration(self.data_descriptor_id,config)
                 self.connector = file.FileConnector(config)
             else:
-                logger.error(f"Unable to initialise connector, data source type {data_source_type} unknown.")
+                log(f"Unable to initialise connector, data source type {data_source_type} unknown.", LogLevel.ERROR)
                 raise
         except Exception as inst:
-            logger.error(f"Unable to initialise connector: {inst}")
+            log(f"Unable to initialise connector: {inst}", LogLevel.ERROR)
             raise 
 
     def __data_descriptor_to_data_contract(self,data_descriptor: str):
@@ -184,6 +177,6 @@ class Contract:
                 data_contract_yaml=yaml.dump(data_contract_json,sort_keys=False)
             return yaml.safe_load(data_contract_yaml)
         except Exception as inst:
-            logger.error(f"Unable to transform data descriptor into data contract: {inst}")
+            log(f"Unable to transform data descriptor into data contract: {inst}", LogLevel.ERROR)
             raise
         

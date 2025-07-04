@@ -3,7 +3,7 @@ This module define the RedisQueue handling class
 """
 import datetime
 import json
-import logging
+from .log_utils import log, LogLevel
 
 import redis
 import os
@@ -21,15 +21,21 @@ class RedisQueue:
         self,
         host=default_settings.redis_host,
         port=default_settings.redis_port,
-        consumer_name="consummer-0",
+        consumer_name=None,
     ):
-        self.consumer_group = "consummers"
-        self.consumer_name = consumer_name
-        self.redis = redis.Redis(host, port, db=0, ssl=True, ssl_ca_certs=os.environ.get("TLS_CAFILE",None))
+        self.consumer_group = "consumers"
+        if consumer_name:
+            self.consumer_name = consumer_name
+        else:
+            cage_id = os.environ.get("DV_CAGE_ID")
+            self.consumer_name = f"cage-{cage_id}"
 
-    def create_consummer_group(self, stream_names = ["events"]) -> None:
+        self.redis = redis.Redis(host, port, db=0)
+        
+
+    def create_consumer_group(self, stream_names = ["events"]) -> None:
         """
-        Create the consummer group if it does not exist
+        Create the consumer group if it does not exist
         """
         for s in stream_names:
             try:
@@ -38,11 +44,11 @@ class RedisQueue:
                 if str(error).startswith("BUSYGROUP"):
                     pass
                 else:
-                    raise error
+                    log(f"could not create consumer group {s}: {str(error)}", LogLevel.ERROR)
 
-    def destroy_consummer_group(self) -> None:
+    def destroy_consumer_group(self) -> None:
         """
-        Remove the consummer group if it exists
+        Remove the consumer group if it exists
         """
         self.redis.xgroup_destroy("events", self.consumer_group)
 
@@ -52,7 +58,7 @@ class RedisQueue:
 
         Args:
             data (dict): event data to publish
-            create_consumer_group (bool, optional): create the consummer group if it does not exist. Defaults to True.
+            create_consumer_group (bool, optional): create the consumer group if it does not exist. Defaults to True.
             stream_name (str, default=events): the stream_name to publish the events to
 
         Returns:
@@ -60,7 +66,7 @@ class RedisQueue:
         """
 
         if create_consumer_group:
-            self.create_consummer_group()
+            self.create_consumer_group()
 
         msg_id = self.redis.xadd(
             stream_name,
@@ -74,16 +80,17 @@ class RedisQueue:
         )
         return msg_id
 
-    def listen_once(self, timeout=120, stream_name = "events"):
+    def listen_once(self, timeout=120, stream_name = "events", debug_log = True):
         """
         Listen to the redis queue until one message is obtained, or timeout is reached
         :param timeout: timeout delay in seconds
         :param stream_name: name of the stream to listen to
         :return: the received message, or None
         """
-        logging.debug("Waiting for message...")
+        if debug_log:
+            log("Waiting for message...", LogLevel.DEBUG)
         messages = self.redis.xreadgroup(
-            "consummers",
+            self.consumer_group,
             self.consumer_name,
             {stream_name: ">"},
             noack=True,
@@ -96,7 +103,8 @@ class RedisQueue:
                 | {"msg_id": msg_id.decode()}
                 for msg_id, msg_data in messages[0][1]
             ][0]
-            msg_id = message["msg_id"]
-            logging.debug(f"Received message {msg_id}...")
+            if debug_log:
+                msg_id = message["msg_id"]
+                log(f"Received message {msg_id}...", LogLevel.DEBUG)
             return message
         return None

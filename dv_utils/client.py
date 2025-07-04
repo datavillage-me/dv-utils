@@ -2,17 +2,32 @@
 This module define the client class to interact with the Datavillage API.
 """
 
-import logging
 from typing import Literal
 
-import json
 import rdflib
 import requests
 
+import os
+
 from .settings import Settings
 from .settings import settings as default_settings
+from .log_utils import log, LogLevel
 
-logger = logging.getLogger(__name__)
+from control_plane_cage_client import AuthenticatedClient
+import requests
+
+def create_client() -> AuthenticatedClient:
+    secret_manager_url = os.environ.get("SECRET_MANAGER_URL", None)
+    if not secret_manager_url:
+        log("no secret manager url was given", LogLevel.ERROR)
+        return None
+    control_plane_url = os.environ.get("CONTROL_PLANE_URL", None)
+    if not control_plane_url:
+        log("no control plane url was given", LogLevel.ERROR)
+        return None
+
+    token = requests.get(f"{secret_manager_url}/control-plane-token").text.strip()
+    return AuthenticatedClient(base_url=control_plane_url, token=token)
 
 
 class Client:
@@ -38,7 +53,7 @@ class Client:
             )
             return public_key
         except Exception as e:
-            logger.error(e)
+            log(str(e), LogLevel.ERROR)
             return None
 
     def get_list_of_participants(self, collaboration_space_id: str, role: str):
@@ -55,7 +70,7 @@ class Client:
                 filtered_participants=[x for x in list_participants if x["invite"]["status"]=="Accepted"]
             return filtered_participants
         except Exception as e:
-            logger.error(e)
+            log(str(e), LogLevel.ERROR)
             return None
 
     def get_users(self):
@@ -94,7 +109,7 @@ class Client:
 
         # currently only 'inferences' and 'explains' are supported
         if not filename in ["inferences", "explains"]:
-            logger.error("Unsupported result file name: " + filename)
+            log("Unsupported result file name: " + filename, LogLevel.ERROR)
 
         self.request(
             f"/clients/{self.settings.collaboration_space_owner_id}/applications/{self.settings.collaboration_space_id}/activeUsers/{user_id}/{filename}",
@@ -121,7 +136,7 @@ class Client:
             _type_: _description_
         """
         url = f"{self.settings.base_url}{path}"
-        logger.debug(f"[HTTP {method}] {url}")
+        log(f"[HTTP {method}] {url}", LogLevel.DEBUG)
 
         headers = {"Authorization": f"Bearer {self.settings.token}"}
         if content_type:

@@ -2,7 +2,6 @@ import copy
 
 from dv_utils import solid_utils
 from dv_utils.connectors.connector import Configuration
-from ..log_utils import audit_log, LogLevel
 
 class SolidConfiguration(Configuration):
   schema_file = "solid.json"
